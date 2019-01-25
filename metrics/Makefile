@@ -16,7 +16,7 @@
 # make install
 #
 
-CONFIG=`which llvm-config-3.8`
+CONFIG=`which llvm-config-7`
 
 CXX=$(shell $(CONFIG) --bindir)/clang++
 CXXFLAGS=$(shell $(CONFIG) --cxxflags) -std=c++11 -O2 -frtti -fexceptions
