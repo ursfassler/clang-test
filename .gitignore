@@ -1,2 +1,4 @@
 *.o
 metrics/metrics
+build-*/
+*.user
