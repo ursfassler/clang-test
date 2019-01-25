@@ -1,5 +1,5 @@
 #include "Clang.hpp"
-#include "Metric_DIT.hpp"
+#include "Metric_IT.hpp"
 #include "Metric_FunctionArguments.hpp"
 #include "Metric_NumberOfMethods.hpp"
 #include "Metric_NumberOfFields.hpp"
@@ -188,7 +188,7 @@ int main(int argc, char ** argv)
 	// available visitors
 
 	VisitorFactory visitor_factory;
-	Metric_DIT::register_in(visitor_factory);
+	Metric_IT::register_in(visitor_factory);
 	Metric_FunctionArguments::register_in(visitor_factory);
 	Metric_NumberOfMethods::register_in(visitor_factory);
 	Metric_NumberOfFields::register_in(visitor_factory);
@@ -208,7 +208,7 @@ int main(int argc, char ** argv)
 
 	std::vector<std::string> arguments =
 	{
-		"-std=c++11", // always C++11
+		"-std=c++17", // always C++11
 	};
 	for (auto i : options.value_include)
 		arguments.push_back(std::string("-I") + i);

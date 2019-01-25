@@ -42,7 +42,7 @@ add_executable(metric
 	Visitor.cpp
 	VisitorFactory.cpp
 	ASTDump.cpp
-	Metric_DIT.cpp
+        Metric_IT.cpp
 	Metric_NumberOfMethods.cpp
 	Metric_NumberOfFields.cpp
 	Metric_FunctionArguments.cpp

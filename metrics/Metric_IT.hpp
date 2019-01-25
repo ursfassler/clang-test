@@ -4,29 +4,24 @@
 #include "Visitor.hpp"
 #include "VisitorDescriptor.hpp"
 #include <map>
+#include <set>
 
 class VisitorFactory;
 
-class Metric_DIT : public Visitor
+class Metric_IT :
+		public Visitor
 {
 	private:
-		struct Item
-		{
-			CXCursor cursor;
-			std::string result;
-		};
-
-		std::map<std::string, Item> data;
-
 		static const VisitorDescriptor DESCRIPTOR;
 
-	private:
-		unsigned int count_depth_of_inheritance_tree(CXCursor cursor) const;
+		void collect_base_classes(CXCursor cursor);
 
 		static CXChildVisitResult collect_base_classes(
 				CXCursor cursor,
 				CXCursor parent,
 				CXClientData data);
+
+		std::map<std::string, std::set<std::string>> graph{};
 
 	public:
 		virtual const std::string & get_name() const;
