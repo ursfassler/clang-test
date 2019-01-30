@@ -43,8 +43,27 @@ CXChildVisitResult Metric_IT::collect_base_classes(
 {
 	std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
 
-	if (clang_getCursorKind(cursor) == CXCursor_CXXBaseSpecifier)
-		base_classes->push_back(clang_getCursorDefinition(cursor));
+	const auto kind = clang_getCursorKind(cursor);
+	switch (kind) {
+		case CXCursor_CXXBaseSpecifier:
+			base_classes->push_back(clang_getCursorDefinition(cursor));
+			break;
+
+		case CXCursor_FieldDecl:
+			clang_visitChildren(cursor, collect_base_classes, data);
+			break;
+
+		case CXCursor_TypeRef:
+			//TODO also check as method arguments?
+			//TODO also check when only used within a method?
+#warning only add when type is a class (our class?)
+			base_classes->push_back(clang_getCursorDefinition(cursor));	//TODO only add when type is a class
+			break;
+
+		default:
+//			std::cout << clang_getCursorKind(cursor) << std::endl;
+			break;
+		}
 
 	return CXChildVisit_Continue;
 }
@@ -107,7 +126,12 @@ void Metric_IT::report(std::ostream & os) const
 
 	for (const auto& itr : graph) {
 			for (const auto& dest : itr.second) {
-					os << escape(itr.first) << " -> " << escape(dest) << std::endl;
+					// only print dependency when it is to a class we defined in our project
+					//FIXME is this ok?
+					const auto idx = graph.find(dest);
+					if (idx != graph.end()) {
+							os << escape(itr.first) << " -> " << escape(dest) << std::endl;
+						}
 				}
 		}
 
