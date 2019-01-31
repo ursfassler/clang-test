@@ -1,5 +1,6 @@
 #include "Clang.hpp"
 #include "Metric_IT.hpp"
+#include "dependency.hpp"
 #include "Metric_FunctionArguments.hpp"
 #include "Metric_NumberOfMethods.hpp"
 #include "Metric_NumberOfFields.hpp"
@@ -189,6 +190,7 @@ int main(int argc, char ** argv)
 
 	VisitorFactory visitor_factory;
 	Metric_IT::register_in(visitor_factory);
+  Dependency::register_in(visitor_factory);
 	Metric_FunctionArguments::register_in(visitor_factory);
 	Metric_NumberOfMethods::register_in(visitor_factory);
 	Metric_NumberOfFields::register_in(visitor_factory);

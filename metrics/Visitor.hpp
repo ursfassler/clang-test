@@ -5,6 +5,7 @@
 #include <string>
 #include <ostream>
 #include <map>
+#include <vector>
 
 class Visitor
 {
@@ -19,9 +20,11 @@ class Visitor
 
 		typedef std::multimap<std::string, Result> ResultContainer;
 
-	protected:
-		std::string namespace_for(CXCursor cursor) const;
-		bool ignore(CXCursor cursor) const;
+  public:
+    static std::string namespace_for(CXCursor cursor);
+    static std::vector<std::string> path_for(CXCursor cursor);
+    static std::string print(const std::vector<std::string>&);
+    bool ignore(CXCursor cursor) const;
 
 	public:
 		virtual ~Visitor();

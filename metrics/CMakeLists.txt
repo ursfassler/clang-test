@@ -43,6 +43,7 @@ add_executable(metric
 	VisitorFactory.cpp
 	ASTDump.cpp
         Metric_IT.cpp
+        dependency.cpp
 	Metric_NumberOfMethods.cpp
 	Metric_NumberOfFields.cpp
 	Metric_FunctionArguments.cpp
