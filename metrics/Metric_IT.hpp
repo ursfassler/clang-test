@@ -5,6 +5,7 @@
 #include "VisitorDescriptor.hpp"
 #include <map>
 #include <set>
+#include <vector>
 
 class VisitorFactory;
 
@@ -22,8 +23,13 @@ class Metric_IT :
 				CXClientData data);
 
 		std::map<std::string, std::set<std::string>> graph{};
+		typedef std::string Member;
+		typedef std::string Method;
+		std::map<Method, std::set<Member>> kohesion;
 
-	public:
+		void collect_member_references(CXCursor cursor);
+		static CXChildVisitResult collect_member_references(CXCursor cursor, CXCursor parent, CXClientData data);
+public:
 		virtual const std::string & get_name() const;
 		virtual const std::string & get_id() const;
 
