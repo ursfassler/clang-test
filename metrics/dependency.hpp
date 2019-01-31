@@ -21,25 +21,11 @@ class Dependency :
 				CXCursor parent,
 				CXClientData data);
 
-<<<<<<< HEAD:metrics/Metric_IT.hpp
-		std::map<std::string, std::set<std::string>> graph{};
-		typedef std::string Member;
-		typedef std::string Method;
-		std::map<Method, std::set<Member>> kohesion;
-
-		void collect_member_references(CXCursor cursor);
-		static CXChildVisitResult collect_member_references(CXCursor cursor, CXCursor parent, CXClientData data);
-		void reportKohesion(std::ostream &os) const;
-		void reportDependencies(std::ostream &os) const;
-		std::string formatMember(CXCursor cursor);
-public:
-=======
     typedef std::vector<std::string> Path;
     std::map<Path, std::set<Path>> graph{};
     std::map<Path, std::set<std::string>> namespaces{};
 
 	public:
->>>>>>> wip: rename to dependency:metrics/dependency.hpp
 		virtual const std::string & get_name() const;
 		virtual const std::string & get_id() const;
 

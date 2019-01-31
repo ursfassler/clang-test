@@ -44,7 +44,8 @@ add_executable(metric
 	ASTDump.cpp
         Metric_IT.cpp
         dependency.cpp
-	Metric_NumberOfMethods.cpp
+        graphviz.cpp
+        Metric_NumberOfMethods.cpp
 	Metric_NumberOfFields.cpp
 	Metric_FunctionArguments.cpp
 	Metric_NestedDepth.cpp

@@ -2,6 +2,7 @@
 #include "Clang.hpp"
 #include "Location.hpp"
 #include "VisitorFactory.hpp"
+#include "graphviz.hpp"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -111,12 +112,6 @@ CXChildVisitResult Dependency::visit(
   collect_base_classes(cursor);
 
   return CXChildVisit_Recurse;
-}
-
-std::string escape(std::string value)
-{
-  std::replace(value.begin(), value.end(), ':', '_');
-  return value;
 }
 
 void Dependency::report(std::ostream & os) const
