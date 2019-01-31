@@ -29,6 +29,9 @@ class Metric_IT :
 
 		void collect_member_references(CXCursor cursor);
 		static CXChildVisitResult collect_member_references(CXCursor cursor, CXCursor parent, CXClientData data);
+		void reportKohesion(std::ostream &os) const;
+		void reportDependencies(std::ostream &os) const;
+		std::string formatMember(CXCursor cursor);
 public:
 		virtual const std::string & get_name() const;
 		virtual const std::string & get_id() const;
