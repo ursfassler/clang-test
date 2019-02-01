@@ -41,14 +41,9 @@ add_executable(metric
 	Range.cpp
 	Visitor.cpp
 	VisitorFactory.cpp
-	ASTDump.cpp
-        Metric_IT.cpp
+        kohesion.cpp
         dependency.cpp
         graphviz.cpp
-        Metric_NumberOfMethods.cpp
-	Metric_NumberOfFields.cpp
-	Metric_FunctionArguments.cpp
-	Metric_NestedDepth.cpp
 	metrics.cpp
 )
 

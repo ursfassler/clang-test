@@ -1,11 +1,6 @@
 #include "Clang.hpp"
-#include "Metric_IT.hpp"
+#include "kohesion.hpp"
 #include "dependency.hpp"
-#include "Metric_FunctionArguments.hpp"
-#include "Metric_NumberOfMethods.hpp"
-#include "Metric_NumberOfFields.hpp"
-#include "Metric_NestedDepth.hpp"
-#include "ASTDump.hpp"
 #include "VisitorFactory.hpp"
 #include "string_split.hpp"
 #include <iostream>
@@ -189,13 +184,8 @@ int main(int argc, char ** argv)
 	// available visitors
 
 	VisitorFactory visitor_factory;
-	Metric_IT::register_in(visitor_factory);
+  Kohesion::register_in(visitor_factory);
   Dependency::register_in(visitor_factory);
-	Metric_FunctionArguments::register_in(visitor_factory);
-	Metric_NumberOfMethods::register_in(visitor_factory);
-	Metric_NumberOfFields::register_in(visitor_factory);
-	Metric_NestedDepth::register_in(visitor_factory);
-	ASTDump::register_in(visitor_factory);
 
 	// command line options
 
@@ -208,11 +198,11 @@ int main(int argc, char ** argv)
 		return EXIT_FAILURE;
 	}
 
-	std::vector<std::string> arguments =
-	{
-		"-std=c++17", // always C++11
-	};
-	for (auto i : options.value_include)
+  std::vector<std::string> arguments =
+  {
+    "-std=c++17", // always C++11
+  };
+  for (auto i : options.value_include)
 		arguments.push_back(std::string("-I") + i);
 	for (auto i : options.value_define)
 		arguments.push_back(std::string("-D") + i);

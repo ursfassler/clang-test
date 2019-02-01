@@ -1,5 +1,4 @@
-#ifndef __METRIC_DIT__HPP__
-#define __METRIC_DIT__HPP__
+#pragma once
 
 #include "Visitor.hpp"
 #include "VisitorDescriptor.hpp"
@@ -12,7 +11,7 @@ class VisitorFactory;
 
 
 
-class Metric_IT :
+class Kohesion :
 		public Visitor
 {
 	private:
@@ -40,5 +39,3 @@ class Metric_IT :
 
 		static void register_in(VisitorFactory &);
 };
-
-#endif

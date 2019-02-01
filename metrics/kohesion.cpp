@@ -1,4 +1,4 @@
-#include "Metric_IT.hpp"
+#include "kohesion.hpp"
 #include "Clang.hpp"
 #include "Location.hpp"
 #include "VisitorFactory.hpp"
@@ -9,35 +9,35 @@
 #include <algorithm>
 #include <vector>
 
-const VisitorDescriptor Metric_IT::DESCRIPTOR =
+const VisitorDescriptor Kohesion::DESCRIPTOR =
 {
-	"IT",
-	"Inheritance Tree",
+  "Ko",
+  "Kohesion",
 	"",
 	true,
 	true,
 	false,
 };
 
-void Metric_IT::register_in(VisitorFactory & factory)
+void Kohesion::register_in(VisitorFactory & factory)
 {
 	factory.add(DESCRIPTOR, []()
 	{
-		return new Metric_IT;
+    return new Kohesion;
 	});
 }
 
-const std::string & Metric_IT::get_name() const
+const std::string & Kohesion::get_name() const
 {
 	return DESCRIPTOR.name;
 }
 
-const std::string & Metric_IT::get_id() const
+const std::string & Kohesion::get_id() const
 {
 	return DESCRIPTOR.id;
 }
 
-CXChildVisitResult Metric_IT::collect_member_references(
+CXChildVisitResult Kohesion::collect_member_references(
 		CXCursor cursor,
 		CXCursor parent,
 		CXClientData data)
@@ -67,7 +67,7 @@ CXChildVisitResult Metric_IT::collect_member_references(
 	return CXChildVisit_Continue;
 }
 
-Metric_IT::Path Metric_IT::getPath(CXCursor cursor)
+Kohesion::Path Kohesion::getPath(CXCursor cursor)
 {
   Path result{};
 
@@ -87,7 +87,7 @@ Metric_IT::Path Metric_IT::getPath(CXCursor cursor)
   return result;
 }
 
-void Metric_IT::collect_member_references(CXCursor cursor)
+void Kohesion::collect_member_references(CXCursor cursor)
 {
   std::vector<CXCursor> members;
 
@@ -102,7 +102,7 @@ void Metric_IT::collect_member_references(CXCursor cursor)
   }
 }
 
-CXChildVisitResult Metric_IT::visit(
+CXChildVisitResult Kohesion::visit(
 		CXCursor cursor,
 		CXCursor parent)
 {
@@ -117,12 +117,12 @@ CXChildVisitResult Metric_IT::visit(
 	return CXChildVisit_Recurse;
 }
 
-void Metric_IT::report(std::ostream & os) const
+void Kohesion::report(std::ostream & os) const
 {
   reportKohesion(os);
 }
 
-void Metric_IT::reportKohesion(std::ostream & os) const
+void Kohesion::reportKohesion(std::ostream & os) const
 {
   graphviz::Graph g{};
 
@@ -142,6 +142,6 @@ void Metric_IT::reportKohesion(std::ostream & os) const
   g.writeTo(graphviz);
 }
 
-void Metric_IT::collect(ResultContainer & container) const
+void Kohesion::collect(ResultContainer & container) const
 {
 }
