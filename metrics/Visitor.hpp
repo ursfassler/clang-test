@@ -21,7 +21,6 @@ class Visitor
     typedef std::multimap<std::string, Result> ResultContainer;
 
   public:
-    static std::vector<std::string> path_for(CXCursor cursor);
     bool ignore(CXCursor cursor) const;
 
   public:

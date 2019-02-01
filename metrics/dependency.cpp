@@ -3,6 +3,7 @@
 #include "Location.hpp"
 #include "VisitorFactory.hpp"
 #include "graphviz.hpp"
+#include "utils.hpp"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -77,14 +78,14 @@ void Dependency::collect_references(CXCursor clazz, CXCursor root)
     return;
   }
 
-  const auto child = path_for(clazz);
+  const auto child = utils::getPath(clazz);
   graph[child];
 
   clang_visitChildren(root, collect_references, &bases);
 
   for (auto base : bases) {
     if (isInProject(base)) {
-      const auto parent = path_for(base);
+      const auto parent = utils::getPath(base);
       graph[child].insert(parent);
     }
   }

@@ -3,6 +3,7 @@
 #include "Location.hpp"
 #include "VisitorFactory.hpp"
 #include "graphviz.hpp"
+#include "utils.hpp"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -64,37 +65,17 @@ CXChildVisitResult Kohesion::collect_member_references(CXCursor cursor, CXCursor
   return CXChildVisit_Recurse;
 }
 
-Kohesion::Path Kohesion::getPath(CXCursor cursor)
-{
-  Path result{};
-
-  for (;;) {
-    result.push_back(Clang::getCursorSpelling(cursor));
-
-    cursor = clang_getCursorSemanticParent(cursor);
-    CXCursorKind kind = Clang::getCursorKind(cursor);
-
-    if (kind == CXCursor_TranslationUnit) {
-      break;
-    }
-  }
-
-  std::reverse(result.begin(), result.end());
-
-  return result;
-}
-
 void Kohesion::collect_member_references(CXCursor cursor)
 {
   std::vector<CXCursor> members;
 
-  const auto method = getPath(cursor);
+  const auto method = utils::getPath(cursor);
   graph[method];
 
   clang_visitChildren(cursor, collect_member_references, &members);
 
   for (auto member : members) {
-    const auto prettyMember = getPath(member);
+    const auto prettyMember = utils::getPath(member);
     graph[method].insert(prettyMember);
   }
 }

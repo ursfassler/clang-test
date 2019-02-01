@@ -25,7 +25,6 @@ class Kohesion :
         void collect_member_references(CXCursor cursor);
         static CXChildVisitResult collect_member_references(CXCursor cursor, CXCursor parent, CXClientData data);
         void reportKohesion(std::ostream &os) const;
-        Path getPath(CXCursor cursor);
     public:
         virtual const std::string & get_name() const;
         virtual const std::string & get_id() const;
