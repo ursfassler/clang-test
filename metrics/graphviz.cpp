@@ -53,48 +53,48 @@ std::string Writer::escape(const std::string& value)
   result += "_";
 
   for (const auto& sym : value) {
-      switch (sym) {
-        case '_':
-          result += "_5f";
-          break;
-        case ':':
-          result += "_3a";
-          break;
-        case '=':
-          result += "_3d";
-          break;
-        case '[':
-          result += "_5b";
-          break;
-        case ']':
-          result += "_5d";
-          break;
-        case '<':
-          result += "_3c";
-          break;
-        case '>':
-          result += "_3e";
-          break;
-        case '!':
-          result += "_21";
-          break;
-        case '*':
-          result += "_2a";
-          break;
-        case '+':
-          result += "_2b";
-          break;
-        case '-':
-          result += "_2d";
-          break;
-        case '.':
-          result += "_2e";
-          break;
+    switch (sym) {
+      case '_':
+        result += "_5f";
+        break;
+      case ':':
+        result += "_3a";
+        break;
+      case '=':
+        result += "_3d";
+        break;
+      case '[':
+        result += "_5b";
+        break;
+      case ']':
+        result += "_5d";
+        break;
+      case '<':
+        result += "_3c";
+        break;
+      case '>':
+        result += "_3e";
+        break;
+      case '!':
+        result += "_21";
+        break;
+      case '*':
+        result += "_2a";
+        break;
+      case '+':
+        result += "_2b";
+        break;
+      case '-':
+        result += "_2d";
+        break;
+      case '.':
+        result += "_2e";
+        break;
 
-        default:
-          result += sym;
-        }
+      default:
+        result += sym;
     }
+  }
 
   return result;
 }
@@ -138,7 +138,7 @@ void Graph::writeTo(Writer& writer)
   writer.separate();
 
   for (const auto& itr : edges) {
-//    writer.node(itr.first);
+    //    writer.node(itr.first);
     tree.add(itr.first);
   }
   tree.writeTo(writer);

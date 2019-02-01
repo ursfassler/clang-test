@@ -9,16 +9,16 @@
 
 class Visitor
 {
-	public:
-		class Result
-		{
-			public:
-				CXCursor cursor;
-				std::string key;
-				std::string value;
-		};
+  public:
+    class Result
+    {
+      public:
+        CXCursor cursor;
+        std::string key;
+        std::string value;
+    };
 
-		typedef std::multimap<std::string, Result> ResultContainer;
+    typedef std::multimap<std::string, Result> ResultContainer;
 
   public:
     static std::string namespace_for(CXCursor cursor);
@@ -26,23 +26,23 @@ class Visitor
     static std::string print(const std::vector<std::string>&);
     bool ignore(CXCursor cursor) const;
 
-	public:
-		virtual ~Visitor();
+  public:
+    virtual ~Visitor();
 
-		virtual const std::string & get_name() const = 0;
-		virtual const std::string & get_id() const = 0;
+    virtual const std::string & get_name() const = 0;
+    virtual const std::string & get_id() const = 0;
 
-		virtual CXChildVisitResult visit(
-				CXCursor cursor,
-				CXCursor parent) = 0;
+    virtual CXChildVisitResult visit(
+        CXCursor cursor,
+        CXCursor parent) = 0;
 
-		virtual void report(std::ostream &) const = 0;
-		virtual void collect(ResultContainer &) const = 0;
+    virtual void report(std::ostream &) const = 0;
+    virtual void collect(ResultContainer &) const = 0;
 
-		static CXChildVisitResult visitor_recursive(
-				CXCursor cursor,
-				CXCursor parent,
-				CXClientData data);
+    static CXChildVisitResult visitor_recursive(
+        CXCursor cursor,
+        CXCursor parent,
+        CXClientData data);
 };
 
 Visitor * visitor_cast(CXClientData data);

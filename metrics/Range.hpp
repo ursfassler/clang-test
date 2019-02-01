@@ -5,13 +5,13 @@
 
 class Range
 {
-	private:
-		CXSourceRange range;
-		Location start;
-		Location end;
-	public:
-		Range(CXCursor cursor);
-		unsigned int get_num_lines() const;
+  private:
+    CXSourceRange range;
+    Location start;
+    Location end;
+  public:
+    Range(CXCursor cursor);
+    unsigned int get_num_lines() const;
 };
 
 #endif
