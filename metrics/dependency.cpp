@@ -37,57 +37,31 @@ const std::string & Dependency::get_id() const
   return DESCRIPTOR.id;
 }
 
-CXChildVisitResult Dependency::collect_base_classes(
-    CXCursor cursor,
-    CXCursor parent,
-    CXClientData data)
+CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor parent, CXClientData data)
 {
   std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
 
   const auto kind = clang_getCursorKind(cursor);
   switch (kind) {
-    case CXCursor_CXXBaseSpecifier:
+    case CXCursor_TypeRef:
       base_classes->push_back(clang_getCursorDefinition(cursor));
       break;
 
-    case CXCursor_FieldDecl:
-//      clang_visitChildren(cursor, collect_base_classes, data);
-      break;
-
-    case CXCursor_TypeRef:
-      //TODO also check as method arguments?
-      //TODO also check when only used within a method?
-#warning only add when type is a class (our class?)
-      base_classes->push_back(clang_getCursorDefinition(cursor));	//TODO only add when type is a class
-      break;
-
-//    case CXCursor_Namespace:
-//    case CXCursor_NamespaceAlias:
-//    case CXCursor_NamespaceRef:
-//      {
-//        const auto def = clang_getCursorDefinition(cursor);
-//        std::cout << namespace_for(def) << Clang::getCursorSpelling(def) << std::endl;
-//        break;
-//      }
-
     default:
-      //			std::cout << clang_getCursorKind(cursor) << std::endl;
       break;
   }
 
-  clang_visitChildren(cursor, collect_base_classes, data);
-
-  return CXChildVisit_Continue;
+  return CXChildVisit_Recurse;
 }
 
-void Dependency::collect_base_classes(CXCursor cursor)
+void Dependency::collect_references(CXCursor cursor)
 {
   std::vector<CXCursor> bases;
 
   const auto child = path_for(cursor);
   graph[child];
 
-  clang_visitChildren(cursor, collect_base_classes, &bases);
+  clang_visitChildren(cursor, collect_references, &bases);
 
   for (auto base : bases) {
     const auto parent = path_for(base);
@@ -99,15 +73,13 @@ CXChildVisitResult Dependency::visit(
     CXCursor cursor,
     CXCursor parent)
 {
-  if (ignore(cursor))
+  if (ignore(cursor)) {
     return CXChildVisit_Continue;
-  if (Clang::getCursorKind(cursor) != CXCursor_ClassDecl)
-    return CXChildVisit_Recurse;
+  }
 
-  std::string usr = Clang::getCursorUSR(cursor);
-
-  std::ostringstream os;
-  collect_base_classes(cursor);
+  if (Clang::getCursorKind(cursor) == CXCursor_ClassDecl) {
+    collect_references(cursor);
+  }
 
   return CXChildVisit_Recurse;
 }
@@ -119,12 +91,7 @@ void Dependency::report(std::ostream & os) const
   for (const auto& itr : graph) {
     g.addNode(itr.first);
     for (const auto& dest : itr.second) {
-      // only print dependency when it is to a class we defined in our project
-      //FIXME is this ok?
-      const auto idx = graph.find(dest);
-      if (idx != graph.end()) {
-        g.addEdge(itr.first, dest);
-      }
+      g.addEdge(itr.first, dest);
     }
   }
 

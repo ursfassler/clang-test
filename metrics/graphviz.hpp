@@ -38,8 +38,8 @@ class Writer
 
 struct TreeNode
 {
+    bool print{false};
     std::map<std::string, TreeNode> children;
-    bool isLeaf() const;
 };
 
 class Tree

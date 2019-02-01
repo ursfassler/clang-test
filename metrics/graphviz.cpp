@@ -159,6 +159,7 @@ void Tree::add(const NodeName& value)
   for (const auto& part : value) {
     node = &node->children[part];
   }
+  node->print = true;
 }
 
 void Tree::writeTo(Writer& writer)
@@ -173,9 +174,11 @@ void Tree::writeTo(const TreeNode& node, const NodeName& path, unsigned& number,
     NodeName np = path;
     np.push_back(child.first);
 
-    if (child.second.isLeaf()) {
+    if (child.second.print) {
       writer.node(np);
-    } else {
+    }
+
+    if (!child.second.children.empty()) {
       writer.startSubgraph(np, number);
       number++;
       writeTo(child.second, np, number, writer);
@@ -183,11 +186,6 @@ void Tree::writeTo(const TreeNode& node, const NodeName& path, unsigned& number,
       writer.separate();
     }
   }
-}
-
-bool TreeNode::isLeaf() const
-{
-  return children.empty();
 }
 
 
