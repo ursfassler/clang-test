@@ -153,8 +153,7 @@ static int setup_visitors(
   if (options.value_visitors == "all") {
     visitors.reserve(visitors.size() + factory.size());
     for (auto i : factory.get_visitor_desc()) {
-      if (i.included_in_all)
-        visitors.push_back(factory.create(i.id));
+      visitors.push_back(factory.create(i.id));
     }
     return EXIT_SUCCESS;
   }

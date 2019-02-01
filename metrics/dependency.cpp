@@ -3,38 +3,17 @@
 #include "VisitorFactory.hpp"
 #include "graphviz.hpp"
 #include "utils.hpp"
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <algorithm>
 #include <vector>
-
-const VisitorDescriptor Dependency::DESCRIPTOR =
-{
-  "Dep",
-  "Dependencies",
-  "",
-  true,
-  true,
-  false,
-};
 
 void Dependency::register_in(VisitorFactory & factory)
 {
-  factory.add(DESCRIPTOR, []()
+  factory.add({
+                "Dep",
+                "Dependencies",
+              }, []()
   {
     return new Dependency;
   });
-}
-
-const std::string & Dependency::get_name() const
-{
-  return DESCRIPTOR.name;
-}
-
-const std::string & Dependency::get_id() const
-{
-  return DESCRIPTOR.id;
 }
 
 CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor, CXClientData data)

@@ -3,38 +3,17 @@
 #include "VisitorFactory.hpp"
 #include "graphviz.hpp"
 #include "utils.hpp"
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <algorithm>
 #include <vector>
-
-const VisitorDescriptor Kohesion::DESCRIPTOR =
-{
-  "Ko",
-  "Kohesion",
-  "",
-  true,
-  true,
-  false,
-};
 
 void Kohesion::register_in(VisitorFactory & factory)
 {
-  factory.add(DESCRIPTOR, []()
+  factory.add({
+                "Ko",
+                "Kohesion",
+              }, []()
   {
     return new Kohesion;
   });
-}
-
-const std::string & Kohesion::get_name() const
-{
-  return DESCRIPTOR.name;
-}
-
-const std::string & Kohesion::get_id() const
-{
-  return DESCRIPTOR.id;
 }
 
 CXChildVisitResult Kohesion::collect_member_references(CXCursor cursor, CXCursor, CXClientData data)
