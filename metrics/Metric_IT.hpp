@@ -15,15 +15,16 @@ class Metric_IT :
 	private:
 		static const VisitorDescriptor DESCRIPTOR;
 
-		typedef std::string Member;
-		typedef std::string Method;
-		std::map<Method, std::set<Member>> kohesion;
+    typedef std::vector<std::string> Path;
+    typedef Path Member;
+    typedef Path Method;
+    std::map<Method, std::set<Member>> graph;
 
 		void collect_member_references(CXCursor cursor);
 		static CXChildVisitResult collect_member_references(CXCursor cursor, CXCursor parent, CXClientData data);
 		void reportKohesion(std::ostream &os) const;
-		std::string formatMember(CXCursor cursor);
-public:
+    Path getPath(CXCursor cursor);
+  public:
 		virtual const std::string & get_name() const;
 		virtual const std::string & get_id() const;
 

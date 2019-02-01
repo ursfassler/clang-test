@@ -52,9 +52,9 @@ CXChildVisitResult Metric_IT::collect_member_references(
 			const auto refkind = clang_getCursorKind(referenced);
 
 			// needed to filter out access to methods
-			if (refkind == CXCursor_FieldDecl) {
+      if (refkind == CXCursor_FieldDecl) {
 					base_classes->push_back(referenced);
-				}
+        }
 			return CXChildVisit_Recurse;
 			}
 
@@ -67,24 +67,39 @@ CXChildVisitResult Metric_IT::collect_member_references(
 	return CXChildVisit_Continue;
 }
 
-std::string Metric_IT::formatMember(CXCursor cursor)
+Metric_IT::Path Metric_IT::getPath(CXCursor cursor)
 {
-	return namespace_for(cursor) + Clang::getCursorSpelling(clang_getCursorSemanticParent(cursor)) + "." + Clang::getCursorSpelling(cursor);
+  Path result{};
+
+  for (;;) {
+    result.push_back(Clang::getCursorSpelling(cursor));
+
+    cursor = clang_getCursorSemanticParent(cursor);
+    CXCursorKind kind = Clang::getCursorKind(cursor);
+
+    if (kind == CXCursor_TranslationUnit) {
+      break;
+    }
+  }
+
+  std::reverse(result.begin(), result.end());
+
+  return result;
 }
 
 void Metric_IT::collect_member_references(CXCursor cursor)
 {
-	std::vector<CXCursor> bases;
+  std::vector<CXCursor> members;
 
-	const auto method = formatMember(cursor);
-	kohesion[method];
+  const auto method = getPath(cursor);
+  graph[method];
 
-	clang_visitChildren(cursor, collect_member_references, &bases);
+  clang_visitChildren(cursor, collect_member_references, &members);
 
-	for (auto base : bases) {
-			const auto pretty = formatMember(base);
-			kohesion[method].insert(pretty);
-	}
+  for (auto member : members) {
+      const auto prettyMember = getPath(member);
+      graph[method].insert(prettyMember);
+  }
 }
 
 CXChildVisitResult Metric_IT::visit(
@@ -118,23 +133,27 @@ void Metric_IT::reportKohesion(std::ostream & os) const
 	os << "node[shape = box];" << std::endl;
 	os << std::endl;
 
-	std::set<std::string> fields{};
-	for (const auto& itr : kohesion) {
+  std::set<Path> fields{};
+  for (const auto& itr : graph) {
 			if (!itr.second.empty()) {
-					os << escape(itr.first) << " [label=\"" + itr.first + "\"]" <<  std::endl;
+        const auto name = print(itr.first);
+          os << escape(name) << " [label=\"" + name + "\"]" <<  std::endl;
 				}
 			fields.insert(itr.second.cbegin(), itr.second.cend());
 		}
 	os << std::endl;
 
 	for (const auto& itr : fields) {
-			os << escape(itr) << " [label=\"" + itr + "\"]" <<  std::endl;
-		}
+    const auto name = print(itr);
+      os << escape(name) << " [label=\"" + name + "\"]" <<  std::endl;
+    }
 	os << std::endl;
 
-	for (const auto& itr : kohesion) {
+  for (const auto& itr : graph) {
 			for (const auto& dest : itr.second) {
-					os << escape(itr.first) << " -> " << escape(dest) << std::endl;
+        const auto source = print(itr.first);
+        const auto destination = print(dest);
+          os << escape(source) << " -> " << escape(destination) << std::endl;
 				}
 		}
 
