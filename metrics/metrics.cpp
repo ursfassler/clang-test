@@ -183,8 +183,8 @@ int main(int argc, char ** argv)
   // available visitors
 
   VisitorFactory visitor_factory;
-  Kohesion::register_in(visitor_factory);
-  Dependency::register_in(visitor_factory);
+  visitor_factory.add<Kohesion>("Ko", "Kohesion");
+  visitor_factory.add<Dependency>("Dep", "Dependencies");
 
   // command line options
 

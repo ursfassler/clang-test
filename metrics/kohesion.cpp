@@ -1,20 +1,8 @@
 #include "kohesion.hpp"
 #include "Clang.hpp"
-#include "VisitorFactory.hpp"
 #include "graphviz.hpp"
 #include "utils.hpp"
 #include <vector>
-
-void Kohesion::register_in(VisitorFactory & factory)
-{
-  factory.add({
-                "Ko",
-                "Kohesion",
-              }, []()
-  {
-    return new Kohesion;
-  });
-}
 
 CXChildVisitResult Kohesion::collect_member_references(CXCursor cursor, CXCursor, CXClientData data)
 {

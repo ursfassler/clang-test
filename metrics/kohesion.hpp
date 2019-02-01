@@ -5,10 +5,6 @@
 #include <set>
 #include <vector>
 
-class VisitorFactory;
-
-
-
 
 class Kohesion :
         public Visitor
@@ -28,6 +24,4 @@ class Kohesion :
                 CXCursor parent) override;
 
         void report(std::ostream &) const override;
-
-        static void register_in(VisitorFactory &);
 };

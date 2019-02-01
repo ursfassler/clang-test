@@ -5,8 +5,6 @@
 #include <set>
 #include <vector>
 
-class VisitorFactory;
-
 class Dependency :
     public Visitor
 {
@@ -29,6 +27,4 @@ class Dependency :
         CXCursor parent) override;
 
     void report(std::ostream &) const override;
-
-    static void register_in(VisitorFactory &);
 };

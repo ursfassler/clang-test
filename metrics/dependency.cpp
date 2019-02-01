@@ -5,17 +5,6 @@
 #include "utils.hpp"
 #include <vector>
 
-void Dependency::register_in(VisitorFactory & factory)
-{
-  factory.add({
-                "Dep",
-                "Dependencies",
-              }, []()
-  {
-    return new Dependency;
-  });
-}
-
 CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor, CXClientData data)
 {
   std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);

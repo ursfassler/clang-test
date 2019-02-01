@@ -26,6 +26,18 @@ class VisitorFactory
         const VisitorDescriptor & desc,
         std::function<Visitor*(void)> create);
 
+    template<typename T>
+    void add(const std::string& id, const std::string& name)
+    {
+      add({
+                            id,
+                            name,
+                          }, []()
+      {
+        return new T();
+      });
+    }
+
     Visitor * create(const std::string & id) const;
 
     std::vector<VisitorDescriptor> get_visitor_desc() const;
