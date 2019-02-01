@@ -37,7 +37,7 @@ const std::string & Dependency::get_id() const
   return DESCRIPTOR.id;
 }
 
-CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor parent, CXClientData data)
+CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor, CXClientData data)
 {
   std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
 
@@ -90,9 +90,7 @@ void Dependency::collect_references(CXCursor clazz, CXCursor root)
   }
 }
 
-CXChildVisitResult Dependency::visit(
-    CXCursor cursor,
-    CXCursor parent)
+CXChildVisitResult Dependency::visit(CXCursor cursor, CXCursor)
 {
   if (ignore(cursor)) {
     return CXChildVisit_Continue;
@@ -141,7 +139,7 @@ void Dependency::report(std::ostream & os) const
   g.writeTo(writer);
 }
 
-void Dependency::collect(ResultContainer & container) const
+void Dependency::collect(ResultContainer&) const
 {
 }
 

@@ -122,7 +122,7 @@ static CXTranslationUnit process_file(
   }
 
   CXTranslationUnit tu = Clang::parseTranslationUnit(
-                           index, filename, argv, arguments.size(), 0, 0, CXTranslationUnit_None);
+                           index, filename, argv, arguments.size());
 
   delete [] argv;
 

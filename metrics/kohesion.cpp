@@ -13,58 +13,55 @@ const VisitorDescriptor Kohesion::DESCRIPTOR =
 {
   "Ko",
   "Kohesion",
-	"",
-	true,
-	true,
-	false,
+  "",
+  true,
+  true,
+  false,
 };
 
 void Kohesion::register_in(VisitorFactory & factory)
 {
-	factory.add(DESCRIPTOR, []()
-	{
+  factory.add(DESCRIPTOR, []()
+  {
     return new Kohesion;
-	});
+  });
 }
 
 const std::string & Kohesion::get_name() const
 {
-	return DESCRIPTOR.name;
+  return DESCRIPTOR.name;
 }
 
 const std::string & Kohesion::get_id() const
 {
-	return DESCRIPTOR.id;
+  return DESCRIPTOR.id;
 }
 
-CXChildVisitResult Kohesion::collect_member_references(
-		CXCursor cursor,
-		CXCursor parent,
-		CXClientData data)
+CXChildVisitResult Kohesion::collect_member_references(CXCursor cursor, CXCursor, CXClientData data)
 {
-	std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
+  std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
 
-	const auto kind = clang_getCursorKind(cursor);
-	switch (kind) {
-		case CXCursor_MemberRef:
-		case CXCursor_MemberRefExpr: {
-			const CXCursor referenced = clang_getCursorReferenced(cursor);
-			const auto refkind = clang_getCursorKind(referenced);
+  const auto kind = clang_getCursorKind(cursor);
+  switch (kind) {
+    case CXCursor_MemberRef:
+    case CXCursor_MemberRefExpr: {
+        const CXCursor referenced = clang_getCursorReferenced(cursor);
+        const auto refkind = clang_getCursorKind(referenced);
 
-			// needed to filter out access to methods
-      if (refkind == CXCursor_FieldDecl) {
-					base_classes->push_back(referenced);
+        // needed to filter out access to methods
+        if (refkind == CXCursor_FieldDecl) {
+          base_classes->push_back(referenced);
         }
-			return CXChildVisit_Recurse;
-			}
 
-		default:
-//			std::cout << clang_getCursorKind(cursor) << std::endl;
-			return CXChildVisit_Recurse;
-		}
+        break;
+      }
+
+    default:
+      break;
+  }
 
 
-	return CXChildVisit_Continue;
+  return CXChildVisit_Recurse;
 }
 
 Kohesion::Path Kohesion::getPath(CXCursor cursor)
@@ -97,24 +94,22 @@ void Kohesion::collect_member_references(CXCursor cursor)
   clang_visitChildren(cursor, collect_member_references, &members);
 
   for (auto member : members) {
-      const auto prettyMember = getPath(member);
-      graph[method].insert(prettyMember);
+    const auto prettyMember = getPath(member);
+    graph[method].insert(prettyMember);
   }
 }
 
-CXChildVisitResult Kohesion::visit(
-		CXCursor cursor,
-		CXCursor parent)
+CXChildVisitResult Kohesion::visit(CXCursor cursor, CXCursor)
 {
-	if (ignore(cursor))
-		return CXChildVisit_Continue;
+  if (ignore(cursor))
+    return CXChildVisit_Continue;
 
-	if (Clang::getCursorKind(cursor) == CXCursor_CXXMethod) {
-			collect_member_references(cursor);
-			return CXChildVisit_Continue;
-		}
+  if (Clang::getCursorKind(cursor) == CXCursor_CXXMethod) {
+    collect_member_references(cursor);
+    return CXChildVisit_Continue;
+  }
 
-	return CXChildVisit_Recurse;
+  return CXChildVisit_Recurse;
 }
 
 void Kohesion::report(std::ostream & os) const
@@ -142,6 +137,6 @@ void Kohesion::reportKohesion(std::ostream & os) const
   g.writeTo(graphviz);
 }
 
-void Kohesion::collect(ResultContainer & container) const
+void Kohesion::collect(ResultContainer &) const
 {
 }

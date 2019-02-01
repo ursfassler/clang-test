@@ -21,13 +21,11 @@ class Visitor
     typedef std::multimap<std::string, Result> ResultContainer;
 
   public:
-    static std::string namespace_for(CXCursor cursor);
     static std::vector<std::string> path_for(CXCursor cursor);
-    static std::string print(const std::vector<std::string>&);
     bool ignore(CXCursor cursor) const;
 
   public:
-    virtual ~Visitor();
+    virtual ~Visitor() = default;
 
     virtual const std::string & get_name() const = 0;
     virtual const std::string & get_id() const = 0;

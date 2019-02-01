@@ -13,14 +13,10 @@ class Clang
     static std::string getCursorSpelling(CXCursor cursor);
     static std::string getCursorKindSpelling(CXCursor cursor);
 
-    static CXTranslationUnit parseTranslationUnit(
-        CXIndex index,
+    static CXTranslationUnit parseTranslationUnit(CXIndex index,
         const std::string & source_filename,
         const char *const * command_line_args,
-        int num_command_line_args,
-        struct CXUnsavedFile * unsaved_files,
-        unsigned num_unsaved_files,
-        unsigned options);
+        int num_command_line_args);
 
     static void disposeTranslationUnit(CXTranslationUnit tu);
 

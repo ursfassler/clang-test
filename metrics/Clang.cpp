@@ -25,15 +25,12 @@ CXTranslationUnit Clang::parseTranslationUnit(
     CXIndex index,
     const std::string & source_filename,
     const char * const * command_line_args,
-    int num_command_line_args,
-    struct CXUnsavedFile * unsaved_files,
-    unsigned num_unsaved_files,
-    unsigned options)
+    int num_command_line_args)
 {
   return clang_parseTranslationUnit(
         index, source_filename.c_str(),
         command_line_args, num_command_line_args,
-        0, 0,
+        nullptr, 0,
         CXTranslationUnit_None);
 }
 
