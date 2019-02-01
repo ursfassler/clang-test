@@ -10,17 +10,6 @@
 class Visitor
 {
   public:
-    class Result
-    {
-      public:
-        CXCursor cursor;
-        std::string key;
-        std::string value;
-    };
-
-    typedef std::multimap<std::string, Result> ResultContainer;
-
-  public:
     bool ignore(CXCursor cursor) const;
 
   public:
@@ -34,7 +23,6 @@ class Visitor
         CXCursor parent) = 0;
 
     virtual void report(std::ostream &) const = 0;
-    virtual void collect(ResultContainer &) const = 0;
 
     static CXChildVisitResult visitor_recursive(
         CXCursor cursor,
@@ -42,6 +30,5 @@ class Visitor
         CXClientData data);
 };
 
-Visitor * visitor_cast(CXClientData data);
 
 #endif

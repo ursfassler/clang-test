@@ -1,24 +1,19 @@
 #include "Visitor.hpp"
-#include "Clang.hpp"
-#include "Location.hpp"
-#include <vector>
-#include <algorithm>
+#include <clang-c/Index.h>
 
-Visitor * visitor_cast(CXClientData data)
-{
-  return static_cast<Visitor *>(data);
-}
 
 CXChildVisitResult Visitor::visitor_recursive(
     CXCursor cursor,
     CXCursor parent,
     CXClientData data)
 {
-  return visitor_cast(data)->visit(cursor, parent);
+  Visitor* visitor = static_cast<Visitor *>(data);
+  return visitor->visit(cursor, parent);
 }
 
 bool Visitor::ignore(CXCursor cursor) const
 {
-  return Location(cursor).is_in_system_header();
+  const auto location = clang_getCursorLocation(cursor);
+  return clang_Location_isInSystemHeader(location);
 }
 

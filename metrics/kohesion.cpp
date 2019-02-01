@@ -1,6 +1,5 @@
 #include "kohesion.hpp"
 #include "Clang.hpp"
-#include "Location.hpp"
 #include "VisitorFactory.hpp"
 #include "graphviz.hpp"
 #include "utils.hpp"
@@ -116,8 +115,4 @@ void Kohesion::reportKohesion(std::ostream & os) const
 
   graphviz::Writer graphviz{os};
   g.writeTo(graphviz);
-}
-
-void Kohesion::collect(ResultContainer &) const
-{
 }

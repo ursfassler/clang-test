@@ -1,6 +1,5 @@
 #include "dependency.hpp"
 #include "Clang.hpp"
-#include "Location.hpp"
 #include "VisitorFactory.hpp"
 #include "graphviz.hpp"
 #include "utils.hpp"
@@ -138,9 +137,5 @@ void Dependency::report(std::ostream & os) const
 
   graphviz::Writer writer{os};
   g.writeTo(writer);
-}
-
-void Dependency::collect(ResultContainer&) const
-{
 }
 

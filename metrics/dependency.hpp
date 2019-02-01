@@ -27,15 +27,14 @@ class Dependency :
     bool isInProject(CXCursor) const;
 
   public:
-    virtual const std::string & get_name() const;
-    virtual const std::string & get_id() const;
+    const std::string & get_name() const override;
+    const std::string & get_id() const override;
 
-    virtual CXChildVisitResult visit(
+    CXChildVisitResult visit(
         CXCursor cursor,
-        CXCursor parent);
+        CXCursor parent) override;
 
-    virtual void report(std::ostream &) const;
-    virtual void collect(ResultContainer &) const;
+    void report(std::ostream &) const override;
 
     static void register_in(VisitorFactory &);
 };
