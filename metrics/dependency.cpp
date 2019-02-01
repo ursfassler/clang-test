@@ -54,14 +54,14 @@ CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor pare
   return CXChildVisit_Recurse;
 }
 
-void Dependency::collect_references(CXCursor cursor)
+void Dependency::collect_references(CXCursor clazz, CXCursor root)
 {
   std::vector<CXCursor> bases;
 
-  const auto child = path_for(cursor);
+  const auto child = path_for(clazz);
   graph[child];
 
-  clang_visitChildren(cursor, collect_references, &bases);
+  clang_visitChildren(root, collect_references, &bases);
 
   for (auto base : bases) {
     const auto parent = path_for(base);
@@ -77,8 +77,29 @@ CXChildVisitResult Dependency::visit(
     return CXChildVisit_Continue;
   }
 
-  if (Clang::getCursorKind(cursor) == CXCursor_ClassDecl) {
-    collect_references(cursor);
+  const auto kind = Clang::getCursorKind(cursor);
+  switch (kind) {
+    case CXCursor_ClassDecl:
+    case CXCursor_TypedefDecl:
+    case CXCursor_StructDecl:
+    case CXCursor_UnionDecl:
+    case CXCursor_EnumDecl:
+    case CXCursor_TypeAliasDecl:
+      collect_references(cursor, cursor);
+      break;
+
+    case CXCursor_CXXMethod:
+    case CXCursor_Constructor:
+    case CXCursor_Destructor:
+    case CXCursor_FieldDecl:
+      {
+        const auto clazz = clang_getCursorSemanticParent(cursor);
+        collect_references(clazz, cursor);
+        break;
+      }
+
+    default:
+      break;
   }
 
   return CXChildVisit_Recurse;
@@ -91,7 +112,11 @@ void Dependency::report(std::ostream & os) const
   for (const auto& itr : graph) {
     g.addNode(itr.first);
     for (const auto& dest : itr.second) {
-      g.addEdge(itr.first, dest);
+      const auto idx = graph.find(dest);
+      const auto ownType = idx != graph.end();
+      if (ownType) {
+        g.addEdge(itr.first, dest);
+      }
     }
   }
 

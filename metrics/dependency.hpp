@@ -14,7 +14,7 @@ class Dependency :
 	private:
 		static const VisitorDescriptor DESCRIPTOR;
 
-    void collect_references(CXCursor cursor);
+    void collect_references(CXCursor clazz, CXCursor root);
 
     static CXChildVisitResult collect_references(
 				CXCursor cursor,
