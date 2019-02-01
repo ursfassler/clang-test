@@ -54,9 +54,28 @@ CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor pare
   return CXChildVisit_Recurse;
 }
 
+bool Dependency::isInProject(CXCursor value) const
+{
+  const auto sl = clang_getCursorLocation(value);
+  CXFile file;
+  clang_getFileLocation(sl, &file, nullptr, nullptr, nullptr);
+  const auto cxfilename = clang_getFileName(file);
+  const std::string filename = Clang::to_string(cxfilename);
+
+  const std::string projectPath = "/home/"; //TODO find better way
+  const auto prefix = filename.substr(0, projectPath.size());
+  const auto isInProject = prefix == projectPath;
+
+  return isInProject;
+}
+
 void Dependency::collect_references(CXCursor clazz, CXCursor root)
 {
   std::vector<CXCursor> bases;
+
+  if (!isInProject(clazz)) {
+    return;
+  }
 
   const auto child = path_for(clazz);
   graph[child];
@@ -64,8 +83,10 @@ void Dependency::collect_references(CXCursor clazz, CXCursor root)
   clang_visitChildren(root, collect_references, &bases);
 
   for (auto base : bases) {
-    const auto parent = path_for(base);
-    graph[child].insert(parent);
+    if (isInProject(base)) {
+      const auto parent = path_for(base);
+      graph[child].insert(parent);
+    }
   }
 }
 
@@ -112,11 +133,7 @@ void Dependency::report(std::ostream & os) const
   for (const auto& itr : graph) {
     g.addNode(itr.first);
     for (const auto& dest : itr.second) {
-      const auto idx = graph.find(dest);
-      const auto ownType = idx != graph.end();
-      if (ownType) {
-        g.addEdge(itr.first, dest);
-      }
+      g.addEdge(itr.first, dest);
     }
   }
 

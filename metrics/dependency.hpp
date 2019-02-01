@@ -24,6 +24,8 @@ class Dependency :
     typedef std::vector<std::string> Path;
     std::map<Path, std::set<Path>> graph{};
 
+    bool isInProject(CXCursor) const;
+
 	public:
 		virtual const std::string & get_name() const;
 		virtual const std::string & get_id() const;
