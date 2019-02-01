@@ -15,14 +15,6 @@ class Metric_IT :
 	private:
 		static const VisitorDescriptor DESCRIPTOR;
 
-		void collect_base_classes(CXCursor cursor);
-
-		static CXChildVisitResult collect_base_classes(
-				CXCursor cursor,
-				CXCursor parent,
-				CXClientData data);
-
-		std::map<std::string, std::set<std::string>> graph{};
 		typedef std::string Member;
 		typedef std::string Method;
 		std::map<Method, std::set<Member>> kohesion;
@@ -30,7 +22,6 @@ class Metric_IT :
 		void collect_member_references(CXCursor cursor);
 		static CXChildVisitResult collect_member_references(CXCursor cursor, CXCursor parent, CXClientData data);
 		void reportKohesion(std::ostream &os) const;
-		void reportDependencies(std::ostream &os) const;
 		std::string formatMember(CXCursor cursor);
 public:
 		virtual const std::string & get_name() const;
