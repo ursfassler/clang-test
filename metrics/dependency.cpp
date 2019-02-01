@@ -5,6 +5,11 @@
 #include "utils.hpp"
 #include <vector>
 
+
+namespace metric
+{
+
+
 CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor, CXClientData data)
 {
   std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
@@ -107,3 +112,5 @@ void Dependency::report(std::ostream & os) const
   g.writeTo(writer);
 }
 
+
+}

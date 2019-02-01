@@ -5,6 +5,9 @@
 #include <set>
 #include <vector>
 
+namespace metric
+{
+
 
 class Kohesion :
         public Visitor
@@ -25,3 +28,6 @@ class Kohesion :
 
         void report(std::ostream &) const override;
 };
+
+
+}

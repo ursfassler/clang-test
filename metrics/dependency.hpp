@@ -5,6 +5,10 @@
 #include <set>
 #include <vector>
 
+namespace metric
+{
+
+
 class Dependency :
     public Visitor
 {
@@ -28,3 +32,6 @@ class Dependency :
 
     void report(std::ostream &) const override;
 };
+
+
+}

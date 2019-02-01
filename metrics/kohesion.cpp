@@ -4,6 +4,10 @@
 #include "utils.hpp"
 #include <vector>
 
+namespace metric
+{
+
+
 CXChildVisitResult Kohesion::collect_member_references(CXCursor cursor, CXCursor, CXClientData data)
 {
   std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
@@ -82,4 +86,7 @@ void Kohesion::reportKohesion(std::ostream & os) const
 
   graphviz::Writer graphviz{os};
   g.writeTo(graphviz);
+}
+
+
 }

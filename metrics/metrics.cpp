@@ -183,8 +183,8 @@ int main(int argc, char ** argv)
   // available visitors
 
   VisitorFactory visitor_factory;
-  visitor_factory.add<Kohesion>("Ko", "Kohesion");
-  visitor_factory.add<Dependency>("Dep", "Dependencies");
+  visitor_factory.add<metric::Kohesion>("Ko", "Kohesion");
+  visitor_factory.add<metric::Dependency>("Dep", "Dependencies");
 
   // command line options
 
