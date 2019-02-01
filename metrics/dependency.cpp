@@ -87,8 +87,6 @@ void Dependency::collect_base_classes(CXCursor cursor)
   const auto child = path_for(cursor);
   graph[child];
 
-  namespaces[{child.begin(), child.end()-1}].insert(child.back());
-
   clang_visitChildren(cursor, collect_base_classes, &bases);
 
   for (auto base : bases) {
@@ -116,51 +114,22 @@ CXChildVisitResult Dependency::visit(
 
 void Dependency::report(std::ostream & os) const
 {
-  using namespace std;
-
-  os << get_name() << endl;
-
-  os << "digraph" << std::endl;
-  os << "{" << std::endl;
-  os << "rankdir=\"BT\";" << std::endl;
-  os << "node[shape = box];" << std::endl;
-  os << std::endl;
-
-  unsigned number = 0;
-  for (const auto& itr : namespaces) {
-    const std::string name = print(itr.first);
-    os << "subgraph cluster_" << number << " {" << std::endl;
-    number++;
-    os << "label = \"" << name << "\";" << std::endl;
-    for (const auto& clas : itr.second) {
-      const std::string cn = name + "::" + clas;
-      os << escape(cn) << " [label=\"" + clas + "\"]" <<  std::endl;
-    }
-    os << "}" << std::endl;
-  }
-
-
-//  for (const auto& itr : graph) {
-//    const std::string name = print(itr.first);
-//    os << escape(name) << " [label=\"" + name + "\"]" <<  std::endl;
-//  }
-
-  os << std::endl;
+  graphviz::Graph g{};
 
   for (const auto& itr : graph) {
+    g.addNode(itr.first);
     for (const auto& dest : itr.second) {
       // only print dependency when it is to a class we defined in our project
       //FIXME is this ok?
       const auto idx = graph.find(dest);
       if (idx != graph.end()) {
-        const std::string source = print(itr.first);
-        const std::string destination = print(dest);
-        os << escape(source) << " -> " << escape(destination) << std::endl;
+        g.addEdge(itr.first, dest);
       }
     }
   }
 
-  os << "}" << std::endl;
+  graphviz::Writer writer{os};
+  g.writeTo(writer);
 }
 
 void Dependency::collect(ResultContainer & container) const

@@ -124,43 +124,24 @@ void Metric_IT::report(std::ostream & os) const
 
 void Metric_IT::reportKohesion(std::ostream & os) const
 {
-	using namespace std;
+  graphviz::Graph g{};
 
-
-	os << "digraph" << std::endl;
-	os << "{" << std::endl;
-	os << "rankdir=\"LR\";" << std::endl;
-	os << "node[shape = box];" << std::endl;
-	os << std::endl;
-
-  std::set<Path> fields{};
   for (const auto& itr : graph) {
-			if (!itr.second.empty()) {
-        const auto name = print(itr.first);
-          os << escape(name) << " [label=\"" + name + "\"]" <<  std::endl;
-				}
-			fields.insert(itr.second.cbegin(), itr.second.cend());
-		}
-	os << std::endl;
-
-	for (const auto& itr : fields) {
-    const auto name = print(itr);
-      os << escape(name) << " [label=\"" + name + "\"]" <<  std::endl;
+    if (!itr.second.empty()) {
+      g.addNode(itr.first);
     }
-	os << std::endl;
+  }
 
   for (const auto& itr : graph) {
-			for (const auto& dest : itr.second) {
-        const auto source = print(itr.first);
-        const auto destination = print(dest);
-          os << escape(source) << " -> " << escape(destination) << std::endl;
-				}
-		}
+    for (const auto& dest : itr.second) {
+      g.addEdge(itr.first, dest);
+    }
+  }
 
-	os << "}" << std::endl;
+  graphviz::Writer graphviz{os};
+  g.writeTo(graphviz);
 }
 
 void Metric_IT::collect(ResultContainer & container) const
 {
 }
-

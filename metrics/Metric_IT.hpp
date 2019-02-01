@@ -9,6 +9,9 @@
 
 class VisitorFactory;
 
+
+
+
 class Metric_IT :
 		public Visitor
 {

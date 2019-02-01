@@ -23,7 +23,6 @@ class Dependency :
 
     typedef std::vector<std::string> Path;
     std::map<Path, std::set<Path>> graph{};
-    std::map<Path, std::set<std::string>> namespaces{};
 
 	public:
 		virtual const std::string & get_name() const;
