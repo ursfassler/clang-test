@@ -1,7 +1,6 @@
 #include "dependency.hpp"
 #include "Clang.hpp"
 #include "VisitorFactory.hpp"
-#include "graphviz.hpp"
 #include "utils.hpp"
 #include <vector>
 
@@ -51,14 +50,14 @@ void Dependency::collect_references(CXCursor clazz, CXCursor root)
   }
 
   const auto child = utils::getPath(clazz);
-  graph[child];
+  graph.addNode(child);
 
   clang_visitChildren(root, collect_references, &bases);
 
   for (auto base : bases) {
     if (isInProject(base)) {
       const auto parent = utils::getPath(base);
-      graph[child].insert(parent);
+      graph.addEdge(child, parent);
     }
   }
 }
@@ -99,17 +98,8 @@ CXChildVisitResult Dependency::visit(CXCursor cursor, CXCursor)
 
 void Dependency::report(std::ostream & os) const
 {
-  graphviz::Graph g{};
-
-  for (const auto& itr : graph) {
-    g.addNode(itr.first);
-    for (const auto& dest : itr.second) {
-      g.addEdge(itr.first, dest);
-    }
-  }
-
   graphviz::Writer writer{os};
-  g.writeTo(writer);
+  graph.writeTo(writer);
 }
 
 

@@ -131,7 +131,7 @@ void Graph::addEdge(const NodeName& source, const NodeName& destination)
   edges[source].insert(destination);
 }
 
-void Graph::writeTo(Writer& writer)
+void Graph::writeTo(Writer& writer) const
 {
   Tree tree{};
   writer.start();

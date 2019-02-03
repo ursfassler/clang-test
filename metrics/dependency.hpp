@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Visitor.hpp"
-#include <map>
-#include <set>
-#include <vector>
+#include "graphviz.hpp"
 
 namespace metric
 {
@@ -20,8 +18,7 @@ class Dependency :
         CXCursor parent,
         CXClientData data);
 
-    typedef std::vector<std::string> Path;
-    std::map<Path, std::set<Path>> graph{};
+    graphviz::Graph graph{};
 
     bool isInProject(CXCursor) const;
 

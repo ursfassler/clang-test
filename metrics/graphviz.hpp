@@ -61,7 +61,7 @@ class Graph
   public:
     void addNode(const NodeName&);
     void addEdge(const NodeName&, const NodeName&);
-    void writeTo(Writer&);
+    void writeTo(Writer&) const;
 
   private:
     std::map<NodeName, std::set<NodeName>> edges{};
