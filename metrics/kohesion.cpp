@@ -1,6 +1,5 @@
 #include "kohesion.hpp"
 #include "Clang.hpp"
-#include "graphviz.hpp"
 #include "utils.hpp"
 #include <vector>
 
@@ -40,13 +39,12 @@ void Kohesion::collect_member_references(CXCursor cursor)
   std::vector<CXCursor> members;
 
   const auto method = utils::getPath(cursor);
-  graph[method];
 
   clang_visitChildren(cursor, collect_member_references, &members);
 
   for (auto member : members) {
     const auto prettyMember = utils::getPath(member);
-    graph[method].insert(prettyMember);
+    graph.addEdge(method, prettyMember);
   }
 }
 
@@ -70,22 +68,8 @@ void Kohesion::report(std::ostream & os) const
 
 void Kohesion::reportKohesion(std::ostream & os) const
 {
-  graphviz::Graph g{};
-
-  for (const auto& itr : graph) {
-    if (!itr.second.empty()) {
-      g.addNode(itr.first);
-    }
-  }
-
-  for (const auto& itr : graph) {
-    for (const auto& dest : itr.second) {
-      g.addEdge(itr.first, dest);
-    }
-  }
-
   graphviz::Writer graphviz{os};
-  g.writeTo(graphviz);
+  graph.writeTo(graphviz);
 }
 
 

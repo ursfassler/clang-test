@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Visitor.hpp"
-#include <map>
-#include <set>
-#include <vector>
+#include "graphviz.hpp"
 
 namespace metric
 {
@@ -13,10 +11,7 @@ class Kohesion :
         public Visitor
 {
     private:
-        typedef std::vector<std::string> Path;
-        typedef Path Member;
-        typedef Path Method;
-        std::map<Method, std::set<Member>> graph;
+        graphviz::Graph graph{};
 
         void collect_member_references(CXCursor cursor);
         static CXChildVisitResult collect_member_references(CXCursor cursor, CXCursor parent, CXClientData data);
