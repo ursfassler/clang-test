@@ -179,6 +179,23 @@ void Graph::writeTo(Writer& writer) const
   writer.end();
 }
 
+void Graph::squashEdges()
+{
+  std::map<NodeName, std::set<NodeName>> reduced{};
+
+  for (const auto& edge : edges) {
+    reduced[edge.source].insert(edge.destination);
+  }
+
+  edges.clear();
+
+  for (const auto& itr : reduced) {
+    for (const auto& dest : itr.second) {
+      edges.push_back({itr.first, dest, {}});
+    }
+  }
+}
+
 void Graph::serialize(std::ostream& stream) const
 {
   for (const auto& itr : nodes) {

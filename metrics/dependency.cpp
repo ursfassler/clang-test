@@ -9,23 +9,6 @@ namespace metric
 {
 
 
-CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor, CXClientData data)
-{
-  std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
-
-  const auto kind = clang_getCursorKind(cursor);
-  switch (kind) {
-    case CXCursor_TypeRef:
-      base_classes->push_back(clang_getCursorDefinition(cursor));
-      break;
-
-    default:
-      break;
-  }
-
-  return CXChildVisit_Recurse;
-}
-
 bool Dependency::isInProject(CXCursor value) const
 {
   const auto sl = clang_getCursorLocation(value);
@@ -41,9 +24,33 @@ bool Dependency::isInProject(CXCursor value) const
   return isInProject;
 }
 
-std::string Dependency::name() const
+std::string location(CXCursor value)
 {
-  return "dependency";
+  const auto sl = clang_getCursorLocation(value);
+  CXFile file;
+  unsigned int line;
+  clang_getFileLocation(sl, &file, &line, nullptr, nullptr);
+  const auto cxfilename = clang_getFileName(file);
+  const std::string filename = Clang::to_string(cxfilename);
+
+  return filename + ":" + std::to_string(line);
+}
+
+CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor, CXClientData data)
+{
+  std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
+
+  const auto kind = clang_getCursorKind(cursor);
+  switch (kind) {
+    case CXCursor_TypeRef:
+      base_classes->push_back(cursor);
+      break;
+
+    default:
+      break;
+  }
+
+  return CXChildVisit_Recurse;
 }
 
 const graphviz::Graph &Dependency::graph() const
@@ -65,9 +72,11 @@ void Dependency::collect_references(CXCursor clazz, CXCursor root)
   clang_visitChildren(root, collect_references, &bases);
 
   for (auto base : bases) {
-    if (isInProject(base)) {
-      const auto parent = utils::getPath(base);
-      bgraph.addEdge(child, parent);
+    const auto defintion = clang_getCursorDefinition(base);
+    if (isInProject(defintion)) {
+      const std::string name = location(base);
+      const auto parent = utils::getPath(defintion);
+      bgraph.addEdge(child, parent, name);
     }
   }
 }
@@ -104,6 +113,11 @@ CXChildVisitResult Dependency::visit(CXCursor cursor, CXCursor)
   }
 
   return CXChildVisit_Recurse;
+}
+
+std::string Dependency::name() const
+{
+  return "dependency";
 }
 
 void Dependency::report(std::ostream & os) const

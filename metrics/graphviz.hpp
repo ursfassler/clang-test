@@ -64,6 +64,8 @@ class Graph
     void addEdge(const NodeName&, const NodeName&, const std::string& description = "");
     void writeTo(Writer&) const;
 
+    void squashEdges();
+
     void serialize(std::ostream&) const;
     void load(std::istream&);
 

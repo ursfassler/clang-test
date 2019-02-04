@@ -22,6 +22,8 @@ int main(int argc, char* argv[])
   boost::property_tree::read_json(arg[1], pt);
   graph.load(pt);
 
+  graph.squashEdges();
+
   {
     std::ofstream file{arg[1] + ".gv"};
     graphviz::Writer writer{file};
