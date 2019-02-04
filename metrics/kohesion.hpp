@@ -17,6 +17,8 @@ class Kohesion :
         static CXChildVisitResult collect_member_references(CXCursor cursor, CXCursor parent, CXClientData data);
         void reportKohesion(std::ostream &os) const;
     public:
+        std::string name() const override;
+
         CXChildVisitResult visit(
                 CXCursor cursor,
                 CXCursor parent) override;

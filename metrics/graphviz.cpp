@@ -1,52 +1,15 @@
 #include "graphviz.hpp"
 
+#include <sstream>
+
 
 namespace graphviz
 {
-
-
-Writer::Writer(std::ostream& stream) :
-  os{stream}
+namespace
 {
-}
 
-void Writer::start()
-{
-  os << "digraph" << std::endl;
-  os << "{" << std::endl;
-  os << "rankdir=\"LR\";" << std::endl;
-  os << "node[shape = box];" << std::endl;
-}
 
-void Writer::startSubgraph(const NodeName& name, unsigned number)
-{
-  os << "subgraph cluster_" << number << std::endl;
-  os << "{" << std::endl;
-  os << "label = \"" << serialize(name) << "\";" << std::endl;
-}
-
-void Writer::end()
-{
-  os << "}" << std::endl;
-}
-
-void Writer::node(const NodeName& name)
-{
-  const auto serialized = serialize(name);
-  os << escape(serialized) << " [label=\"" + serialized + "\"]" <<  std::endl;
-}
-
-void Writer::edge(const NodeName& source, const NodeName& destination)
-{
-  os << escape(serialize(source)) << " -> " << escape(serialize(destination)) << std::endl;
-}
-
-void Writer::separate()
-{
-  os << std::endl;
-}
-
-std::string Writer::escape(const std::string& value)
+std::string escape(const std::string& value)
 {
   std::string result;
 
@@ -99,7 +62,7 @@ std::string Writer::escape(const std::string& value)
   return result;
 }
 
-std::string Writer::serialize(const NodeName& value)
+std::string serialize(const NodeName& value)
 {
   std::string result{};
 
@@ -117,18 +80,84 @@ std::string Writer::serialize(const NodeName& value)
   return result;
 }
 
+template <class Container>
+void split3(const std::string& str, Container& cont, const std::string& delim)
+{
+    std::size_t current, previous = 0;
+    current = str.find(delim);
+    while (current != std::string::npos) {
+        cont.push_back(str.substr(previous, current - previous));
+        previous = current + delim.size();
+        current = str.find(delim, previous);
+    }
+    cont.push_back(str.substr(previous, current - previous));
+}
+
+NodeName deserialize(const std::string& value)
+{
+  NodeName result;
+  split3(value, result, "::");
+  return result;
+}
+
+
+}
+
+
+Writer::Writer(std::ostream& stream) :
+  os{stream}
+{
+}
+
+void Writer::start()
+{
+  os << "digraph" << std::endl;
+  os << "{" << std::endl;
+  os << "rankdir=\"LR\";" << std::endl;
+  os << "node[shape = box];" << std::endl;
+}
+
+void Writer::startSubgraph(const NodeName& name, unsigned number)
+{
+  os << "subgraph cluster_" << number << std::endl;
+  os << "{" << std::endl;
+  os << "label = \"" << serialize(name) << "\";" << std::endl;
+}
+
+void Writer::end()
+{
+  os << "}" << std::endl;
+}
+
+void Writer::node(const NodeName& name)
+{
+  const auto serialized = serialize(name);
+  os << escape(serialized) << " [label=\"" + serialized + "\"]" <<  std::endl;
+}
+
+void Writer::edge(const NodeName& source, const NodeName& destination)
+{
+  os << escape(serialize(source)) << " -> " << escape(serialize(destination)) << std::endl;
+}
+
+void Writer::separate()
+{
+  os << std::endl;
+}
+
+
 
 void Graph::addNode(const NodeName& value)
 {
-  edges[value];
+  nodes.insert(value);
 }
 
-void Graph::addEdge(const NodeName& source, const NodeName& destination)
+void Graph::addEdge(const NodeName& source, const NodeName& destination, const std::string &description)
 {
   addNode(source);
   addNode(destination);
 
-  edges[source].insert(destination);
+  edges.push_back({source, destination, description});
 }
 
 void Graph::writeTo(Writer& writer) const
@@ -137,20 +166,64 @@ void Graph::writeTo(Writer& writer) const
   writer.start();
   writer.separate();
 
-  for (const auto& itr : edges) {
-    //    writer.node(itr.first);
-    tree.add(itr.first);
+  for (const auto& itr : nodes) {
+    tree.add(itr);
   }
   tree.writeTo(writer);
   writer.separate();
 
   for (const auto& itr : edges) {
-    for (const auto& dest : itr.second) {
-      writer.edge(itr.first, dest);
-    }
+    writer.edge(itr.source, itr.destination);
   }
 
   writer.end();
+}
+
+void Graph::serialize(std::ostream& stream) const
+{
+  for (const auto& itr : nodes) {
+    stream << graphviz::serialize(itr);
+    stream << std::endl;
+  }
+
+  stream << std::endl;
+
+  for (const auto& itr : edges) {
+    stream << graphviz::serialize(itr.source);
+    stream << " ";
+    stream << graphviz::serialize(itr.destination);
+    stream << " ";
+    stream << itr.description;
+    stream << std::endl;
+  }
+}
+
+void Graph::load(std::istream& stream)
+{
+  edges.clear();
+
+  std::string line;
+  while (std::getline(stream, line)) {
+    if (line == "") {
+      break;
+    }
+
+    const auto node = deserialize(line);
+    addNode(node);
+  }
+
+  while (!stream.eof()) {
+    std::string sourceName;
+    std::string destinationName;
+    stream >> sourceName;
+    stream >> destinationName;
+
+    if (sourceName == "") {
+      break;
+    }
+
+    addEdge(deserialize(sourceName), deserialize(destinationName));
+  }
 }
 
 void Tree::add(const NodeName& value)

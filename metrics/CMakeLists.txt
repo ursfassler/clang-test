@@ -21,7 +21,7 @@ execute_process(
 	OUTPUT_VARIABLE CXX_FLAGS
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-set(CMAKE_CXX_FLAGS "${CXX_FLAGS} -std=c++11 -O2 -frtti -fexceptions")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS} -std=c++11 -frtti -fexceptions")
 
 execute_process(
 	COMMAND llvm-config-7 --ldflags
@@ -76,4 +76,9 @@ target_link_libraries(
 	clangRewriteFrontend
 	clangCodeGen
 	clangBasic
+)
+
+add_executable(graph
+    graph.cpp
+    graphviz.cpp
 )

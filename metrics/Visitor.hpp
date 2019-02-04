@@ -1,11 +1,11 @@
-#ifndef __VISITOR__HPP__
-#define __VISITOR__HPP__
+#pragma once
 
 #include <clang-c/Index.h>
 #include <string>
 #include <ostream>
 #include <map>
 #include <vector>
+
 
 class Visitor
 {
@@ -14,6 +14,8 @@ class Visitor
 
   public:
     virtual ~Visitor() = default;
+
+    virtual std::string name() const = 0;
 
     virtual CXChildVisitResult visit(
         CXCursor cursor,
@@ -26,6 +28,3 @@ class Visitor
         CXCursor parent,
         CXClientData data);
 };
-
-
-#endif

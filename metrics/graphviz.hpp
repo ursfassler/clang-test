@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <ostream>
+#include <istream>
 #include <vector>
 #include <memory>
 
@@ -31,8 +32,6 @@ class Writer
   private:
     std::ostream& os;
 
-    std::string escape(const std::string&);
-    std::string serialize(const NodeName&);
 };
 
 
@@ -56,15 +55,28 @@ class Tree
 
 };
 
+
 class Graph
 {
   public:
     void addNode(const NodeName&);
-    void addEdge(const NodeName&, const NodeName&);
+    void addEdge(const NodeName&, const NodeName&, const std::string& description = "");
     void writeTo(Writer&) const;
 
+    void serialize(std::ostream&) const;
+    void load(std::istream&);
+
   private:
-    std::map<NodeName, std::set<NodeName>> edges{};
+    std::set<NodeName> nodes{};
+
+    struct Edge
+    {
+        NodeName source;
+        NodeName destination;
+        std::string description;
+    };
+
+    std::vector<Edge> edges{};
 };
 
 

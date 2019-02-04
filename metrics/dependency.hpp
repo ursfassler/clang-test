@@ -23,6 +23,8 @@ class Dependency :
     bool isInProject(CXCursor) const;
 
   public:
+    std::string name() const override;
+
     CXChildVisitResult visit(
         CXCursor cursor,
         CXCursor parent) override;

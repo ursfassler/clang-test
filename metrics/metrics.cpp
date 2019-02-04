@@ -9,6 +9,8 @@
 #include <vector>
 #include <boost/program_options.hpp>
 #include <cstdlib>
+#include <fstream>
+
 
 struct Options
 {
@@ -226,8 +228,10 @@ int main(int argc, char ** argv)
 
   // TODO: reports instantiation to be replaced by factory
   if (options.value_report_type == "plain") {
-    for (auto visitor : visitors)
-      visitor->report(std::cout);
+    for (auto visitor : visitors) {
+      std::ofstream file{visitor->name() + ".graph"};
+      visitor->report(file);
+    }
   }
 
   for (auto tu : translationunits)

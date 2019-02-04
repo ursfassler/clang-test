@@ -2,6 +2,7 @@
 #include "Clang.hpp"
 #include "utils.hpp"
 #include <vector>
+#include <sstream>
 
 namespace metric
 {
@@ -68,8 +69,14 @@ void Kohesion::report(std::ostream & os) const
 
 void Kohesion::reportKohesion(std::ostream & os) const
 {
-  graphviz::Writer graphviz{os};
-  graph.writeTo(graphviz);
+//  graphviz::Writer graphviz{os};
+//  graph.writeTo(graphviz);
+  graph.serialize(os);
+}
+
+std::string Kohesion::name() const
+{
+  return "kohesion";
 }
 
 

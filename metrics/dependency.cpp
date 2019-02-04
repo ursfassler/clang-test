@@ -41,6 +41,11 @@ bool Dependency::isInProject(CXCursor value) const
   return isInProject;
 }
 
+std::string Dependency::name() const
+{
+  return "dependency";
+}
+
 void Dependency::collect_references(CXCursor clazz, CXCursor root)
 {
   std::vector<CXCursor> bases;
@@ -98,8 +103,9 @@ CXChildVisitResult Dependency::visit(CXCursor cursor, CXCursor)
 
 void Dependency::report(std::ostream & os) const
 {
-  graphviz::Writer writer{os};
-  graph.writeTo(writer);
+//  graphviz::Writer writer{os};
+//  graph.writeTo(writer);
+  graph.serialize(os);
 }
 
 
