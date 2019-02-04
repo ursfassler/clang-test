@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/property_tree/ptree.hpp>
 #include <string>
 #include <map>
 #include <set>
@@ -65,6 +66,9 @@ class Graph
 
     void serialize(std::ostream&) const;
     void load(std::istream&);
+
+    void serialize(boost::property_tree::ptree&) const;
+    void load(const boost::property_tree::ptree&);
 
   private:
     std::set<NodeName> nodes{};

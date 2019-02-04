@@ -10,6 +10,8 @@
 #include <boost/program_options.hpp>
 #include <cstdlib>
 #include <fstream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 
 struct Options
@@ -229,8 +231,9 @@ int main(int argc, char ** argv)
   // TODO: reports instantiation to be replaced by factory
   if (options.value_report_type == "plain") {
     for (auto visitor : visitors) {
-      std::ofstream file{visitor->name() + ".graph"};
-      visitor->report(file);
+      boost::property_tree::ptree pt;
+      visitor->graph().serialize(pt);
+      write_json(visitor->name() + ".graph", pt);
     }
   }
 

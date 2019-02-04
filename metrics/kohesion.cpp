@@ -45,7 +45,7 @@ void Kohesion::collect_member_references(CXCursor cursor)
 
   for (auto member : members) {
     const auto prettyMember = utils::getPath(member);
-    graph.addEdge(method, prettyMember);
+    bgraph.addEdge(method, prettyMember);
   }
 }
 
@@ -71,12 +71,17 @@ void Kohesion::reportKohesion(std::ostream & os) const
 {
 //  graphviz::Writer graphviz{os};
 //  graph.writeTo(graphviz);
-  graph.serialize(os);
+  bgraph.serialize(os);
 }
 
 std::string Kohesion::name() const
 {
   return "kohesion";
+}
+
+const graphviz::Graph &Kohesion::graph() const
+{
+  return bgraph;
 }
 
 

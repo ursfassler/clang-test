@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphviz.hpp"
 #include <clang-c/Index.h>
 #include <string>
 #include <ostream>
@@ -21,6 +22,7 @@ class Visitor
         CXCursor cursor,
         CXCursor parent) = 0;
 
+    virtual const graphviz::Graph& graph() const = 0;
     virtual void report(std::ostream &) const = 0;
 
     static CXChildVisitResult visitor_recursive(

@@ -3,6 +3,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 
 int main(int argc, char* argv[])
@@ -16,10 +18,9 @@ int main(int argc, char* argv[])
 
   graphviz::Graph graph;
 
-  {
-    std::ifstream file{arg[1]};
-    graph.load(file);
-  }
+  boost::property_tree::ptree pt;
+  boost::property_tree::read_json(arg[1], pt);
+  graph.load(pt);
 
   {
     std::ofstream file{arg[1] + ".gv"};

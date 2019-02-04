@@ -46,6 +46,11 @@ std::string Dependency::name() const
   return "dependency";
 }
 
+const graphviz::Graph &Dependency::graph() const
+{
+  return bgraph;
+}
+
 void Dependency::collect_references(CXCursor clazz, CXCursor root)
 {
   std::vector<CXCursor> bases;
@@ -55,14 +60,14 @@ void Dependency::collect_references(CXCursor clazz, CXCursor root)
   }
 
   const auto child = utils::getPath(clazz);
-  graph.addNode(child);
+  bgraph.addNode(child);
 
   clang_visitChildren(root, collect_references, &bases);
 
   for (auto base : bases) {
     if (isInProject(base)) {
       const auto parent = utils::getPath(base);
-      graph.addEdge(child, parent);
+      bgraph.addEdge(child, parent);
     }
   }
 }
@@ -105,7 +110,7 @@ void Dependency::report(std::ostream & os) const
 {
 //  graphviz::Writer writer{os};
 //  graph.writeTo(writer);
-  graph.serialize(os);
+  bgraph.serialize(os);
 }
 
 

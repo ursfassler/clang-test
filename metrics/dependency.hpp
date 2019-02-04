@@ -18,12 +18,14 @@ class Dependency :
         CXCursor parent,
         CXClientData data);
 
-    graphviz::Graph graph{};
+    graphviz::Graph bgraph{};
 
     bool isInProject(CXCursor) const;
 
   public:
     std::string name() const override;
+
+    const graphviz::Graph& graph() const override;
 
     CXChildVisitResult visit(
         CXCursor cursor,

@@ -200,6 +200,7 @@ void Graph::serialize(std::ostream& stream) const
 
 void Graph::load(std::istream& stream)
 {
+  nodes.clear();
   edges.clear();
 
   std::string line;
@@ -223,6 +224,76 @@ void Graph::load(std::istream& stream)
     }
 
     addEdge(deserialize(sourceName), deserialize(destinationName));
+  }
+}
+
+void arrayAdd(boost::property_tree::ptree& array, const boost::property_tree::ptree& value)
+{
+  boost::property_tree::ptree::value_type node{"", value};
+  array.push_back(node);
+}
+
+boost::property_tree::ptree writeName(const NodeName& value)
+{
+  boost::property_tree::ptree array;
+  for (const auto& itr : value) {
+    boost::property_tree::ptree::value_type node{"", itr};
+    array.push_back(node);
+  }
+  return array;
+}
+
+void Graph::serialize(boost::property_tree::ptree& tree) const
+{
+  {
+    boost::property_tree::ptree sn;
+    for (const auto& itr : nodes) {
+      boost::property_tree::ptree node;
+      node.add_child("name", writeName(itr));
+      arrayAdd(sn, node);
+    }
+    tree.add_child("nodes", sn);
+  }
+  {
+    boost::property_tree::ptree sn;
+    for (const auto& itr : edges) {
+      boost::property_tree::ptree node;
+      node.add_child("source", writeName(itr.source));
+      node.add_child("destination", writeName(itr.destination));
+      if (!itr.description.empty()) {
+        node.add("description", itr.description);
+      }
+      arrayAdd(sn, node);
+    }
+    tree.add_child("edges", sn);
+  }
+}
+
+graphviz::NodeName readName(const boost::property_tree::ptree& value)
+{
+  graphviz::NodeName name{};
+  for (const auto part : value) {
+    name.push_back(part.second.data());
+  }
+  return name;
+}
+
+void Graph::load(const boost::property_tree::ptree& root)
+{
+  nodes.clear();
+  edges.clear();
+
+  const auto nodes = root.get_child("nodes");
+  for (const auto node : nodes) {
+    const auto name = readName(node.second.get_child("name"));
+    addNode(name);
+  }
+
+  const auto edges = root.get_child("edges");
+  for (const auto edge : edges) {
+    const auto source = readName(edge.second.get_child("source"));
+    const auto destination = readName(edge.second.get_child("destination"));
+    addEdge(source, destination);
   }
 }
 
