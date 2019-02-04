@@ -1,5 +1,6 @@
 #include "graphviz.hpp"
 
+#include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 
 
@@ -196,6 +197,16 @@ void Graph::squashEdges()
   }
 }
 
+void Graph::serialize(GraphWriter& visitor) const
+{
+  for (const auto& itr : nodes) {
+    visitor.node(itr);
+  }
+  for (const auto& itr : edges) {
+    visitor.edge(itr);
+  }
+}
+
 void Graph::serialize(std::ostream& stream) const
 {
   for (const auto& itr : nodes) {
@@ -260,32 +271,6 @@ boost::property_tree::ptree writeName(const NodeName& value)
   return array;
 }
 
-void Graph::serialize(boost::property_tree::ptree& tree) const
-{
-  {
-    boost::property_tree::ptree sn;
-    for (const auto& itr : nodes) {
-      boost::property_tree::ptree node;
-      node.add_child("name", writeName(itr));
-      arrayAdd(sn, node);
-    }
-    tree.add_child("nodes", sn);
-  }
-  {
-    boost::property_tree::ptree sn;
-    for (const auto& itr : edges) {
-      boost::property_tree::ptree node;
-      node.add_child("source", writeName(itr.source));
-      node.add_child("destination", writeName(itr.destination));
-      if (!itr.description.empty()) {
-        node.add("description", itr.description);
-      }
-      arrayAdd(sn, node);
-    }
-    tree.add_child("edges", sn);
-  }
-}
-
 graphviz::NodeName readName(const boost::property_tree::ptree& value)
 {
   graphviz::NodeName name{};
@@ -347,6 +332,32 @@ void Tree::writeTo(const TreeNode& node, const NodeName& path, unsigned& number,
       writer.separate();
     }
   }
+}
+
+void JsonWriter::node(const NodeName& visitee)
+{
+  boost::property_tree::ptree node;
+  node.add_child("name", writeName(visitee));
+  arrayAdd(nodes, node);
+}
+
+void JsonWriter::edge(const Edge& visitee)
+{
+  boost::property_tree::ptree node;
+  node.add_child("source", writeName(visitee.source));
+  node.add_child("destination", writeName(visitee.destination));
+  if (!visitee.description.empty()) {
+    node.add("description", visitee.description);
+  }
+  arrayAdd(edges, node);
+}
+
+void JsonWriter::writeFile(const std::string& filename) const
+{
+  boost::property_tree::ptree root;
+  root.add_child("nodes", nodes);
+  root.add_child("edges", edges);
+  write_json(filename, root);
 }
 
 

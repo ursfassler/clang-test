@@ -231,9 +231,9 @@ int main(int argc, char ** argv)
   // TODO: reports instantiation to be replaced by factory
   if (options.value_report_type == "plain") {
     for (auto visitor : visitors) {
-      boost::property_tree::ptree pt;
-      visitor->graph().serialize(pt);
-      write_json(visitor->name() + ".graph", pt);
+      graphviz::JsonWriter writer{};
+      visitor->graph().serialize(writer);
+      writer.writeFile(visitor->name() + ".graph");
     }
   }
 

@@ -57,6 +57,35 @@ class Tree
 };
 
 
+struct Edge
+{
+    NodeName source;
+    NodeName destination;
+    std::string description;
+};
+
+class GraphWriter
+{
+  public:
+    virtual void node(const NodeName&) = 0;
+    virtual void edge(const Edge&) = 0;
+
+};
+
+class JsonWriter :
+    public GraphWriter
+{
+  public:
+    void node(const NodeName&) override;
+    void edge(const Edge&) override;
+    void writeFile(const std::string&) const;
+
+  private:
+    boost::property_tree::ptree nodes{};
+    boost::property_tree::ptree edges{};
+
+};
+
 class Graph
 {
   public:
@@ -66,22 +95,15 @@ class Graph
 
     void squashEdges();
 
+    void serialize(GraphWriter&) const;
+
     void serialize(std::ostream&) const;
     void load(std::istream&);
 
-    void serialize(boost::property_tree::ptree&) const;
     void load(const boost::property_tree::ptree&);
 
   private:
     std::set<NodeName> nodes{};
-
-    struct Edge
-    {
-        NodeName source;
-        NodeName destination;
-        std::string description;
-    };
-
     std::vector<Edge> edges{};
 };
 
