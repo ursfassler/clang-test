@@ -64,10 +64,18 @@ struct Edge
     std::string description;
 };
 
+struct Node
+{
+    NodeName name;
+};
+
+bool operator<(const Node&, const Node&);
+
+
 class GraphWriter
 {
   public:
-    virtual void node(const NodeName&) = 0;
+    virtual void node(const Node&) = 0;
     virtual void edge(const Edge&) = 0;
 
 };
@@ -76,7 +84,7 @@ class JsonWriter :
     public GraphWriter
 {
   public:
-    void node(const NodeName&) override;
+    void node(const Node&) override;
     void edge(const Edge&) override;
     void writeFile(const std::string&) const;
 
@@ -103,7 +111,7 @@ class Graph
     void load(const boost::property_tree::ptree&);
 
   private:
-    std::set<NodeName> nodes{};
+    std::set<Node> nodes{};
     std::vector<Edge> edges{};
 };
 

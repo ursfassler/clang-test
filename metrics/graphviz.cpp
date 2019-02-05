@@ -150,7 +150,7 @@ void Writer::separate()
 
 void Graph::addNode(const NodeName& value)
 {
-  nodes.insert(value);
+  nodes.insert({value});
 }
 
 void Graph::addEdge(const NodeName& source, const NodeName& destination, const std::string &description)
@@ -168,7 +168,7 @@ void Graph::writeTo(Writer& writer) const
   writer.separate();
 
   for (const auto& itr : nodes) {
-    tree.add(itr);
+    tree.add(itr.name);
   }
   tree.writeTo(writer);
   writer.separate();
@@ -210,7 +210,7 @@ void Graph::serialize(GraphWriter& visitor) const
 void Graph::serialize(std::ostream& stream) const
 {
   for (const auto& itr : nodes) {
-    stream << graphviz::serialize(itr);
+    stream << graphviz::serialize(itr.name);
     stream << std::endl;
   }
 
@@ -334,10 +334,10 @@ void Tree::writeTo(const TreeNode& node, const NodeName& path, unsigned& number,
   }
 }
 
-void JsonWriter::node(const NodeName& visitee)
+void JsonWriter::node(const Node& visitee)
 {
   boost::property_tree::ptree node;
-  node.add_child("name", writeName(visitee));
+  node.add_child("name", writeName(visitee.name));
   arrayAdd(nodes, node);
 }
 
@@ -358,6 +358,11 @@ void JsonWriter::writeFile(const std::string& filename) const
   root.add_child("nodes", nodes);
   root.add_child("edges", edges);
   write_json(filename, root);
+}
+
+bool operator<(const Node& left, const Node& right)
+{
+  return left.name < right.name;
 }
 
 
