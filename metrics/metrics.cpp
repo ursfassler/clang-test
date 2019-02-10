@@ -160,7 +160,10 @@ int main(int argc, char ** argv)
     translationunits.push_back(tu);
   }
 
-  visitor.report(std::cout);
+  {
+    std::ofstream file{"ast.xml"};
+    visitor.report(file);
+  }
 
   for (auto tu : translationunits)
     Clang::disposeTranslationUnit(tu);

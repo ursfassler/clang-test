@@ -12,14 +12,14 @@ namespace metric
 std::map<CXCursorKind, std::string> KindName
 {
   {CXCursor_Namespace, "namespace"},
-  {CXCursor_TypedefDecl, "typedef"},
+  {CXCursor_TypedefDecl, "class"},
   {CXCursor_ClassDecl, "class"},
-  {CXCursor_StructDecl, "struct"},
-  {CXCursor_CXXMethod, "method"},
-  {CXCursor_Constructor, "constructor"},
+  {CXCursor_StructDecl, "class"},
+  {CXCursor_CXXMethod, "function"},
+  {CXCursor_Constructor, "function"},
   {CXCursor_FieldDecl, "field"},
   {CXCursor_FunctionDecl, "function"},
-  {CXCursor_FunctionTemplate, "function template"},
+  {CXCursor_FunctionTemplate, "function"},
 };
 
 std::string nameOf(CXCursorKind kind)
@@ -64,7 +64,6 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXCli
           std::string kname = nameOf(kind);
           std::string name = Clang::getCursorSpelling(cursor);
           node = new Node(name, kname);
-          node->file = usr;
           (*vd->visited)[usr] = node;
           vd->parent->children.push_back(node);
         }
@@ -147,30 +146,111 @@ VisitorData *Clast::getData()
   return &data;
 }
 
-void write(const Node* node, unsigned level, std::ostream& os, const std::map<std::string, Node*>& nodes)
+
+void Clast::write(const Node* node, XmlWriter& writer) const
 {
-  os << std::string(level * 4, ' ');
-  os << node->name << "(" << node->type << ")";
-  os << " " << node->file << ":" << node->line;
+  writer.startNode(node->type);
+  writer.attribute("name", node->name);
+  writer.attribute("id", std::to_string(reinterpret_cast<long>(node)));
+  if (node->file != "") {
+    writer.attribute("file", node->file);
+  }
+  if (node->line != 0) {
+    writer.attribute("line", std::to_string(node->line));
+  }
 
   for (const auto& ref : node->references) {
-    const auto itr = nodes.find(ref);
-    if (itr != nodes.end()) {
-      os << " " << itr->second->name;
+    const auto itr = visited.find(ref);
+    if (itr != visited.end()) {
+      writer.startNode("reference");
+      writer.attribute("target", std::to_string(reinterpret_cast<long>(itr->second)));
+      writer.endNode();
     }
   }
-  os << std::endl;
 
   for (const auto& child : node->children) {
-    write(child, level+1, os, nodes);
+    write(child, writer);
   }
+
+  writer.endNode();
 }
 
 void Clast::report(std::ostream & os) const
 {
-  write(&root, 0, os, visited);
+  XmlWriter writer{os};
+  write(&root, writer);
 }
 
+XmlWriter::XmlWriter(std::ostream& stream_) :
+  stream{stream_}
+{
+}
+
+void XmlWriter::startNode(const std::string& name)
+{
+  if (nodeIsOpen) {
+    stream << ">";
+    stream << std::endl;
+    nodeIsOpen = false;
+  }
+
+  stream << std::string(path.size() * 4, ' ');
+  stream << "<" << escape(name);
+  path.push_back(name);
+
+  nodeIsOpen = true;
+}
+
+void XmlWriter::endNode()
+{
+  if (nodeIsOpen) {
+    path.pop_back();
+    stream << "/>";
+    stream << std::endl;
+    nodeIsOpen = false;
+  } else {
+    const auto name = path.back();
+    path.pop_back();
+    stream << std::string(path.size() * 4, ' ');
+    stream << "</" << escape(name) << ">";
+    stream << std::endl;
+  }
+}
+
+void XmlWriter::attribute(const std::string& name, const std::string& value)
+{
+  stream << " " << escape(name) <<  "=\"" << escape(value) << "\"";
+}
+
+std::string XmlWriter::escape(const std::string& value)
+{
+  std::string result;
+
+  for (const auto& sym : value) {
+    switch (sym) {
+      case '"':
+        result += "&quot;";
+        break;
+      case '\'':
+        result += "&apos;";
+        break;
+      case '<':
+        result += "&lt;";
+        break;
+      case '>':
+        result += "&gt;";
+        break;
+      case '&':
+        result += "&amp;";
+        break;
+
+      default:
+        result += sym;
+    }
+  }
+
+  return result;
+}
 
 
 }
