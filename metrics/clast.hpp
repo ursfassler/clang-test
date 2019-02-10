@@ -1,7 +1,11 @@
 #pragma once
 
-#include "Visitor.hpp"
-#include "graphviz.hpp"
+#include <string>
+#include <set>
+#include <vector>
+#include <map>
+#include <clang-c/Index.h>
+
 
 namespace metric
 {
@@ -32,24 +36,19 @@ struct VisitorData
 };
 
 
-class Clast :
-    public Visitor
+class Clast
 {
   private:
     Node root{{}, {}};
     std::map<std::string, Node*> visited{};
+    VisitorData data{&root, &visited};
 
-    static CXChildVisitResult visit_children(CXCursor cursor, CXCursor, CXClientData data);
   public:
-    std::string name() const override;
+    static CXChildVisitResult visit_children(CXCursor cursor, CXCursor, CXClientData data);
 
-    const graphviz::Graph& graph() const override;
+    VisitorData* getData();
 
-    CXChildVisitResult visit(
-        CXCursor cursor,
-        CXCursor parent) override;
-
-    void report(std::ostream &) const override;
+    void report(std::ostream &) const;
 };
 
 

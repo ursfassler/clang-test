@@ -37,10 +37,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${LD_FLAGS} -L${LIB_DIR}")
 
 add_executable(metric
 	Clang.cpp
-	Visitor.cpp
-	VisitorFactory.cpp
-        kohesion.cpp
-        dependency.cpp
         clast.cpp
         graphviz.cpp
 	metrics.cpp

@@ -1,8 +1,8 @@
 #include "clast.hpp"
 #include "Clang.hpp"
-#include "VisitorFactory.hpp"
 #include "utils.hpp"
 #include <vector>
+#include <ostream>
 
 
 namespace metric
@@ -32,7 +32,13 @@ std::string nameOf(CXCursorKind kind)
   }
 }
 
-CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor, CXClientData data)
+bool ignore(CXCursor cursor)
+{
+  const auto location = clang_getCursorLocation(cursor);
+  return clang_Location_isInSystemHeader(location);
+}
+
+CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXClientData data)
 {
   if (ignore(cursor)) {
     return CXChildVisit_Continue;
@@ -50,13 +56,19 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor, CXClientData
         const auto itr = vd->visited->find(usr);
         const bool visited = (itr != vd->visited->end());
 
-        std::string kname = nameOf(kind);
-        std::string name = Clang::getCursorSpelling(cursor);
-        Node* node = visited ? itr->second : new Node(name, kname);
+        Node* node;
 
-        (*vd->visited)[usr] = node;
+        if (visited) {
+          node = itr->second;
+        } else {
+          std::string kname = nameOf(kind);
+          std::string name = Clang::getCursorSpelling(cursor);
+          node = new Node(name, kname);
+          node->file = usr;
+          (*vd->visited)[usr] = node;
+          vd->parent->children.push_back(node);
+        }
 
-        vd->parent->children.push_back(node);
         VisitorData nvd{node, vd->visited};
         clang_visitChildren(cursor, visit_children, &nvd);
         break;
@@ -78,6 +90,8 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor, CXClientData
     case CXCursor_ClassTemplate:
     case CXCursor_ClassTemplatePartialSpecialization:
     {
+        //TODO make it work with multiple input files
+
         const auto def = clang_getCursorDefinition(cursor); // in order to traverse the method bodies
         const auto usr = Clang::getCursorUSR(def);
         const bool visited = (vd->visited->find(usr) != vd->visited->end());
@@ -128,16 +142,9 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor, CXClientData
   return CXChildVisit_Continue;
 }
 
-CXChildVisitResult Clast::visit(CXCursor cursor, CXCursor parent)
+VisitorData *Clast::getData()
 {
-  VisitorData data{&this->root, &visited};
-
-  return visit_children(cursor, parent,  &data);
-}
-
-std::string Clast::name() const
-{
-  return "clast";
+  return &data;
 }
 
 void write(const Node* node, unsigned level, std::ostream& os, const std::map<std::string, Node*>& nodes)
@@ -162,12 +169,6 @@ void write(const Node* node, unsigned level, std::ostream& os, const std::map<st
 void Clast::report(std::ostream & os) const
 {
   write(&root, 0, os, visited);
-}
-
-const graphviz::Graph &Clast::graph() const
-{
-  static graphviz::Graph g{};
-  return g;
 }
 
 
