@@ -36,39 +36,24 @@ struct VisitorData
 };
 
 
-
-class XmlWriter
-{
-    public:
-        XmlWriter(std::ostream&);
-
-        void startNode(const std::string&);
-        void endNode();
-        void attribute(const std::string& name, const std::string& value);
-
-    private:
-        std::ostream& stream;
-        std::vector<std::string> path{};
-        bool nodeIsOpen{false};
-
-        std::string escape(const std::string &value);
-};
+class XmlWriter;
 
 
 class Clast
 {
-  private:
-        Node root{{}, "project"};
-    std::map<std::string, Node*> visited{};
-    VisitorData data{&root, &visited};
-
-    void write(const Node *node, XmlWriter&) const;
     public:
-    static CXChildVisitResult visit_children(CXCursor cursor, CXCursor, CXClientData data);
+        static CXChildVisitResult visit_children(CXCursor cursor, CXCursor, CXClientData data);
 
-    VisitorData* getData();
+        VisitorData* getData();
 
-    void report(std::ostream &) const;
+        void report(std::ostream &) const;
+
+    private:
+        Node root{{}, "project"};
+        std::map<std::string, Node*> visited{};
+        VisitorData data{&root, &visited};
+
+        void write(const Node *node, XmlWriter&) const;
 };
 
 

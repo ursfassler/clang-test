@@ -38,9 +38,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${LD_FLAGS} -L${LIB_DIR}")
 add_executable(metric
 	Clang.cpp
         clast.cpp
-        graphviz.cpp
 	metrics.cpp
         utils.cpp
+        XmlWriter.cpp
 )
 
 target_link_libraries(
