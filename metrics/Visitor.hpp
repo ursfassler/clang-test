@@ -11,7 +11,7 @@
 class Visitor
 {
   public:
-    bool ignore(CXCursor cursor) const;
+    static bool ignore(CXCursor cursor);
 
   public:
     virtual ~Visitor() = default;

@@ -12,6 +12,8 @@ namespace utils
 typedef std::vector<std::string> Path;
 
 Path getPath(CXCursor);
+std::string serialize(const Path&);
+std::string location(CXCursor);
 
 
 }

@@ -24,18 +24,6 @@ bool Dependency::isInProject(CXCursor value) const
   return isInProject;
 }
 
-std::string location(CXCursor value)
-{
-  const auto sl = clang_getCursorLocation(value);
-  CXFile file;
-  unsigned int line;
-  clang_getFileLocation(sl, &file, &line, nullptr, nullptr);
-  const auto cxfilename = clang_getFileName(file);
-  const std::string filename = Clang::to_string(cxfilename);
-
-  return filename + ":" + std::to_string(line);
-}
-
 CXChildVisitResult Dependency::collect_references(CXCursor cursor, CXCursor, CXClientData data)
 {
   std::vector<CXCursor> * base_classes = static_cast<std::vector<CXCursor> *>(data);
@@ -74,7 +62,7 @@ void Dependency::collect_references(CXCursor clazz, CXCursor root)
   for (auto base : bases) {
     const auto defintion = clang_getCursorDefinition(base);
     if (isInProject(defintion)) {
-      const std::string name = location(base);
+      const std::string name = utils::location(base);
       const auto parent = utils::getPath(defintion);
       bgraph.addEdge(child, parent, name);
     }

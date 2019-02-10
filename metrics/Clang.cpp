@@ -13,7 +13,8 @@ std::string Clang::to_string(CXString str)
 
 std::string Clang::getCursorSpelling(CXCursor cursor)
 {
-  return to_string(clang_getCursorSpelling(cursor));
+  CXString spelling = clang_getCursorSpelling(cursor);
+  return to_string(spelling);
 }
 
 std::string Clang::getCursorKindSpelling(CXCursor cursor)

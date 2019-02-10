@@ -1,6 +1,7 @@
 #include "Clang.hpp"
 #include "kohesion.hpp"
 #include "dependency.hpp"
+#include "clast.hpp"
 #include "VisitorFactory.hpp"
 #include "string_split.hpp"
 #include <iostream>
@@ -189,6 +190,7 @@ int main(int argc, char ** argv)
   VisitorFactory visitor_factory;
   visitor_factory.add<metric::Kohesion>("Ko", "Kohesion");
   visitor_factory.add<metric::Dependency>("Dep", "Dependencies");
+  visitor_factory.add<metric::Clast>("cla", "Clast");
 
   // command line options
 
@@ -234,6 +236,8 @@ int main(int argc, char ** argv)
       graphviz::JsonWriter writer{};
       visitor->graph().serialize(writer);
       writer.writeFile(visitor->name() + ".graph");
+
+      visitor->report(std::cout);
     }
   }
 

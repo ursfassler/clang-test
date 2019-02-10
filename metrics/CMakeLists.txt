@@ -41,6 +41,7 @@ add_executable(metric
 	VisitorFactory.cpp
         kohesion.cpp
         dependency.cpp
+        clast.cpp
         graphviz.cpp
 	metrics.cpp
         utils.cpp

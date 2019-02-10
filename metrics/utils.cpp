@@ -28,5 +28,35 @@ Path getPath(CXCursor cursor)
   return result;
 }
 
+std::string serialize(const Path& value)
+{
+  std::string result{};
+
+  bool first = true;
+  for (const auto& itr : value) {
+    if (first) {
+      first = false;
+    } else {
+      result += "::";
+    }
+
+    result += itr;
+  }
+
+  return result;
+}
+
+std::string location(CXCursor value)
+{
+  const auto sl = clang_getCursorLocation(value);
+  CXFile file;
+  unsigned int line;
+  clang_getFileLocation(sl, &file, &line, nullptr, nullptr);
+  const auto cxfilename = clang_getFileName(file);
+  const std::string filename = Clang::to_string(cxfilename);
+
+  return filename + ":" + std::to_string(line);
+}
+
 
 }

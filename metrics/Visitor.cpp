@@ -11,7 +11,7 @@ CXChildVisitResult Visitor::visitor_recursive(
   return visitor->visit(cursor, parent);
 }
 
-bool Visitor::ignore(CXCursor cursor) const
+bool Visitor::ignore(CXCursor cursor)
 {
   const auto location = clang_getCursorLocation(cursor);
   return clang_Location_isInSystemHeader(location);
