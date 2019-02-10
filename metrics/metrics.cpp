@@ -1,5 +1,6 @@
 #include "Clang.hpp"
 #include "clast.hpp"
+#include "XmlWriter.hpp"
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -159,7 +160,8 @@ int main(int argc, char ** argv)
 
   {
     std::ofstream file{"ast.xml"};
-    visitor.report(file);
+    metric::XmlWriter writer{file};
+    visitor.report(writer);
   }
 
   for (auto tu : translationunits)

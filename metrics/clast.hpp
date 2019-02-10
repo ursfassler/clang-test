@@ -46,7 +46,7 @@ class Clast
 
         VisitorData* getData();
 
-        void report(std::ostream &) const;
+        void report(XmlWriter&) const;
 
     private:
         Node root{{}, "project"};
@@ -54,6 +54,7 @@ class Clast
         VisitorData data{&root, &visited};
 
         void write(const Node *node, XmlWriter&) const;
+        std::string idOf(const Node*) const;
 };
 
 

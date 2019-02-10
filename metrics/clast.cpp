@@ -150,7 +150,7 @@ void Clast::write(const Node* node, XmlWriter& writer) const
 {
   writer.startNode(node->type);
   writer.attribute("name", node->name);
-  writer.attribute("id", std::to_string(reinterpret_cast<long>(node)));
+  writer.attribute("id", idOf(node));
   if (node->file != "") {
     writer.attribute("file", node->file);
   }
@@ -162,7 +162,7 @@ void Clast::write(const Node* node, XmlWriter& writer) const
     const auto itr = visited.find(ref);
     if (itr != visited.end()) {
       writer.startNode("reference");
-      writer.attribute("target", std::to_string(reinterpret_cast<long>(itr->second)));
+      writer.attribute("target", idOf(itr->second));
       writer.endNode();
     }
   }
@@ -174,9 +174,13 @@ void Clast::write(const Node* node, XmlWriter& writer) const
   writer.endNode();
 }
 
-void Clast::report(std::ostream & os) const
+std::string Clast::idOf(const Node* node) const
 {
-  XmlWriter writer{os};
+  return std::to_string(reinterpret_cast<long>(node));
+}
+
+void Clast::report(XmlWriter& writer) const
+{
   write(&root, writer);
 }
 
