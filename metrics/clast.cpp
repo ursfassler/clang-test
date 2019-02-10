@@ -5,27 +5,9 @@
 #include <vector>
 
 
-#include <iostream>
-
-
 namespace metric
 {
 
-
-bool Clast::isInProject(CXCursor value)
-{
-  const auto sl = clang_getCursorLocation(value);
-  CXFile file;
-  clang_getFileLocation(sl, &file, nullptr, nullptr, nullptr);
-  const auto cxfilename = clang_getFileName(file);
-  const std::string filename = Clang::to_string(cxfilename);
-
-  const std::string projectPath = "/home/"; //TODO find better way
-  const auto prefix = filename.substr(0, projectPath.size());
-  const auto isInProject = prefix == projectPath;
-
-  return isInProject;
-}
 
 std::map<CXCursorKind, std::string> KindName
 {
@@ -63,13 +45,21 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor, CXClientData
   switch (kind) {
     case CXCursor_Namespace:
       {
-      std::string kname = nameOf(kind);
-      std::string name = Clang::getCursorSpelling(cursor);
-      Node* node = new Node(name + "(" + kname + ")");
-      vd->parent->children.push_back(node);
-      VisitorData nvd{node, vd->visited};
-      clang_visitChildren(cursor, visit_children, &nvd);
-      break;
+        const auto def = clang_getCursorDefinition(cursor);
+        const auto usr = Clang::getCursorUSR(def);
+        const auto itr = vd->visited->find(usr);
+        const bool visited = (itr != vd->visited->end());
+
+        std::string kname = nameOf(kind);
+        std::string name = Clang::getCursorSpelling(cursor);
+        Node* node = visited ? itr->second : new Node(name, kname);
+
+        (*vd->visited)[usr] = node;
+
+        vd->parent->children.push_back(node);
+        VisitorData nvd{node, vd->visited};
+        clang_visitChildren(cursor, visit_children, &nvd);
+        break;
       }
 
     case CXCursor_UnexposedDecl:
@@ -95,7 +85,10 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor, CXClientData
         if (!visited) {
           std::string kname = nameOf(kind);
           std::string name = Clang::getCursorSpelling(cursor);
-          Node* node = new Node(name + "(" + kname + ")");
+          Node* node = new Node(name, kname);
+          const auto loc = utils::location(def);
+          node->file = loc.first;
+          node->line = loc.second;
           vd->parent->children.push_back(node);
           (*vd->visited)[usr] = node;
           VisitorData nvd{node, vd->visited};
@@ -150,7 +143,8 @@ std::string Clast::name() const
 void write(const Node* node, unsigned level, std::ostream& os, const std::map<std::string, Node*>& nodes)
 {
   os << std::string(level * 4, ' ');
-  os << node->name;
+  os << node->name << "(" << node->type << ")";
+  os << " " << node->file << ":" << node->line;
 
   for (const auto& ref : node->references) {
     const auto itr = nodes.find(ref);

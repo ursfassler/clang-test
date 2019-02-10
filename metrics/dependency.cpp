@@ -62,7 +62,8 @@ void Dependency::collect_references(CXCursor clazz, CXCursor root)
   for (auto base : bases) {
     const auto defintion = clang_getCursorDefinition(base);
     if (isInProject(defintion)) {
-      const std::string name = utils::location(base);
+      const auto location = utils::location(base);
+      const std::string name = location.first + ":" + std::to_string(location.second);
       const auto parent = utils::getPath(defintion);
       bgraph.addEdge(child, parent, name);
     }

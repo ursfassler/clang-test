@@ -46,7 +46,7 @@ std::string serialize(const Path& value)
   return result;
 }
 
-std::string location(CXCursor value)
+std::pair<std::string, unsigned> location(CXCursor value)
 {
   const auto sl = clang_getCursorLocation(value);
   CXFile file;
@@ -55,7 +55,7 @@ std::string location(CXCursor value)
   const auto cxfilename = clang_getFileName(file);
   const std::string filename = Clang::to_string(cxfilename);
 
-  return filename + ":" + std::to_string(line);
+  return {filename, line};
 }
 
 
