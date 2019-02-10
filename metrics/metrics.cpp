@@ -1,6 +1,5 @@
 #include "Clang.hpp"
 #include "clast.hpp"
-#include "string_split.hpp"
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -8,8 +7,6 @@
 #include <boost/program_options.hpp>
 #include <cstdlib>
 #include <fstream>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 
 struct Options
