@@ -3,8 +3,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include <tinyxml2.h>
 
 
 int main(int argc, char* argv[])
@@ -18,9 +17,13 @@ int main(int argc, char* argv[])
 
   graphviz::Graph graph;
 
-  boost::property_tree::ptree pt;
-  boost::property_tree::read_json(arg[1], pt);
-  graph.load(pt);
+  tinyxml2::XMLDocument xml_doc;
+
+  tinyxml2::XMLError eResult = xml_doc.LoadFile(arg[1].c_str());
+  if (eResult != tinyxml2::XML_SUCCESS)
+    return false;
+
+  graph.load(xml_doc);
 
   graph.squashEdges();
 

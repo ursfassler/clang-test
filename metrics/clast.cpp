@@ -10,7 +10,7 @@ namespace metric
 
 std::map<CXCursorKind, std::string> KindName
 {
-  {CXCursor_Namespace, "namespace"},
+  {CXCursor_Namespace, "package"},
   {CXCursor_TypedefDecl, "class"},
   {CXCursor_ClassDecl, "class"},
   {CXCursor_StructDecl, "class"},

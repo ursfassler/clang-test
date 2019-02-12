@@ -79,3 +79,8 @@ add_executable(graph
     graph.cpp
     graphviz.cpp
 )
+
+target_link_libraries(graph
+        tinyxml2
+)
+

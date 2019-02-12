@@ -1,6 +1,5 @@
 #include "graphviz.hpp"
 
-#include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 
 
@@ -197,16 +196,6 @@ void Graph::squashEdges()
   }
 }
 
-void Graph::serialize(GraphWriter& visitor) const
-{
-  for (const auto& itr : nodes) {
-    visitor.node(itr);
-  }
-  for (const auto& itr : edges) {
-    visitor.edge(itr);
-  }
-}
-
 void Graph::serialize(std::ostream& stream) const
 {
   for (const auto& itr : nodes) {
@@ -255,47 +244,52 @@ void Graph::load(std::istream& stream)
   }
 }
 
-void arrayAdd(boost::property_tree::ptree& array, const boost::property_tree::ptree& value)
-{
-  boost::property_tree::ptree::value_type node{"", value};
-  array.push_back(node);
-}
-
-boost::property_tree::ptree writeName(const NodeName& value)
-{
-  boost::property_tree::ptree array;
-  for (const auto& itr : value) {
-    boost::property_tree::ptree::value_type node{"", itr};
-    array.push_back(node);
-  }
-  return array;
-}
-
-graphviz::NodeName readName(const boost::property_tree::ptree& value)
-{
-  graphviz::NodeName name{};
-  for (const auto part : value) {
-    name.push_back(part.second.data());
-  }
-  return name;
-}
-
-void Graph::load(const boost::property_tree::ptree& root)
+void Graph::load(const tinyxml2::XMLDocument& document)
 {
   nodes.clear();
   edges.clear();
 
-  const auto nodes = root.get_child("nodes");
-  for (const auto node : nodes) {
-    const auto name = readName(node.second.get_child("name"));
-    addNode(name);
+  const tinyxml2::XMLNode* root = document.FirstChild();
+  if (!root) {
+    return;
+  }
+  const auto rootElement = root->ToElement();
+  if (!rootElement) {
+    return;
   }
 
-  const auto edges = root.get_child("edges");
-  for (const auto edge : edges) {
-    const auto source = readName(edge.second.get_child("source"));
-    const auto destination = readName(edge.second.get_child("destination"));
-    addEdge(source, destination);
+  std::map<std::string, NodeName> idMap{};
+  std::map<std::string, std::set<std::string>> links{};
+
+  load(rootElement, {}, idMap, links);
+
+  for (const auto& link : links) {
+    const auto source = idMap[link.first];
+    for (const auto& ref : link.second) {
+      const auto destination = idMap[ref];
+      addEdge(source, destination);
+    }
+  }
+}
+
+void Graph::load(const tinyxml2::XMLElement* root, const NodeName& path, std::map<std::string, NodeName>& idMap, std::map<std::string, std::set<std::string>>& links)
+{
+  const auto attr = root->FindAttribute("name");
+  const NodeName np = attr ? path + attr->Value() : path;
+  if (attr) {
+    addNode(np);
+  }
+
+  const auto id = root->Attribute("id");
+  idMap[id] = np;
+
+  for (const tinyxml2::XMLElement* child = root->FirstChildElement(); child != nullptr; child = child->NextSiblingElement()) {
+    if (std::string{child->Name()} == "reference") {
+      const auto dest = child->Attribute("target");
+      links[id].insert(dest);
+    } else {
+      load(child, np, idMap, links);
+    }
   }
 }
 
@@ -334,35 +328,18 @@ void Tree::writeTo(const TreeNode& node, const NodeName& path, unsigned& number,
   }
 }
 
-void JsonWriter::node(const Node& visitee)
-{
-  boost::property_tree::ptree node;
-  node.add_child("name", writeName(visitee.name));
-  arrayAdd(nodes, node);
-}
-
-void JsonWriter::edge(const Edge& visitee)
-{
-  boost::property_tree::ptree node;
-  node.add_child("source", writeName(visitee.source));
-  node.add_child("destination", writeName(visitee.destination));
-  if (!visitee.description.empty()) {
-    node.add("description", visitee.description);
-  }
-  arrayAdd(edges, node);
-}
-
-void JsonWriter::writeFile(const std::string& filename) const
-{
-  boost::property_tree::ptree root;
-  root.add_child("nodes", nodes);
-  root.add_child("edges", edges);
-  write_json(filename, root);
-}
-
 bool operator<(const Node& left, const Node& right)
 {
   return left.name < right.name;
+}
+
+NodeName operator+(const NodeName& path, const std::string& last)
+{
+  NodeName result = path;
+
+  result.push_back(last);
+
+  return result;
 }
 
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/property_tree/ptree.hpp>
 #include <string>
 #include <map>
 #include <set>
@@ -8,6 +7,7 @@
 #include <istream>
 #include <vector>
 #include <memory>
+#include <tinyxml2.h>
 
 
 namespace graphviz
@@ -15,6 +15,8 @@ namespace graphviz
 
 
 typedef std::vector<std::string> NodeName;
+
+NodeName operator+(const NodeName&, const std::string&);
 
 
 class Writer
@@ -72,28 +74,6 @@ struct Node
 bool operator<(const Node&, const Node&);
 
 
-class GraphWriter
-{
-  public:
-    virtual void node(const Node&) = 0;
-    virtual void edge(const Edge&) = 0;
-
-};
-
-class JsonWriter :
-    public GraphWriter
-{
-  public:
-    void node(const Node&) override;
-    void edge(const Edge&) override;
-    void writeFile(const std::string&) const;
-
-  private:
-    boost::property_tree::ptree nodes{};
-    boost::property_tree::ptree edges{};
-
-};
-
 class Graph
 {
   public:
@@ -103,16 +83,17 @@ class Graph
 
     void squashEdges();
 
-    void serialize(GraphWriter&) const;
-
     void serialize(std::ostream&) const;
     void load(std::istream&);
 
-    void load(const boost::property_tree::ptree&);
+    void load(const tinyxml2::XMLDocument&);
 
   private:
     std::set<Node> nodes{};
     std::vector<Edge> edges{};
+
+    void load(const tinyxml2::XMLElement*, const NodeName& path, std::map<std::string, NodeName> &idMap, std::map<std::string, std::set<std::string> > &links);
+
 };
 
 
