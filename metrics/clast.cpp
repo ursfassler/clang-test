@@ -125,8 +125,20 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXCli
       const CXCursor referenced = clang_getCursorReferenced(cursor);
 
       if (!ignore(referenced)) {
-        const auto usr = Clang::getCursorUSR(referenced);
-        vd->parent->references.insert(usr);
+        const auto parentKind = clang_getCursorKind(parent);
+        switch (parentKind) {
+          case CXCursor_CXXMethod:
+          case CXCursor_Constructor:
+          case CXCursor_Destructor:
+            // don't add reference to defining parent
+            break;
+
+          default: {
+              const auto usr = Clang::getCursorUSR(referenced);
+              vd->parent->references.insert(usr);
+              break;
+            }
+        }
       }
       clang_visitChildren(cursor, visit_children, vd);
       break;
