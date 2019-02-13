@@ -53,6 +53,9 @@ std::string escape(const std::string& value)
       case '.':
         result += "_2e";
         break;
+      case '~':
+	result += "_7e";
+	break;
 
       default:
         result += sym;

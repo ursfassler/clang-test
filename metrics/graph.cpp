@@ -20,8 +20,10 @@ int main(int argc, char* argv[])
   tinyxml2::XMLDocument xml_doc;
 
   tinyxml2::XMLError eResult = xml_doc.LoadFile(arg[1].c_str());
-  if (eResult != tinyxml2::XML_SUCCESS)
-    return false;
+  if (eResult != tinyxml2::XML_SUCCESS) {
+    std::cerr << "could not load file: " << arg[1] << std::endl;
+    return -1;
+  }
 
   graph.load(xml_doc);
 

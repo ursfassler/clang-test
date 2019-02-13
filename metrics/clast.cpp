@@ -2,6 +2,7 @@
 #include "Clang.hpp"
 #include "utils.hpp"
 #include "XmlWriter.hpp"
+#include <iostream>
 
 
 namespace metric
@@ -14,8 +15,12 @@ std::map<CXCursorKind, std::string> KindName
   {CXCursor_TypedefDecl, "class"},
   {CXCursor_ClassDecl, "class"},
   {CXCursor_StructDecl, "class"},
+  {CXCursor_EnumDecl, "class"},
+  {CXCursor_UnionDecl, "class"},
+  {CXCursor_ClassTemplate, "class"},
   {CXCursor_CXXMethod, "function"},
   {CXCursor_Constructor, "function"},
+  {CXCursor_Destructor, "function"},
   {CXCursor_FieldDecl, "field"},
   {CXCursor_FunctionDecl, "function"},
   {CXCursor_FunctionTemplate, "function"},
@@ -25,6 +30,7 @@ std::string nameOf(CXCursorKind kind)
 {
   const auto itr = KindName.find(kind);
   if (itr == KindName.end()) {
+    std::cerr << "unknown cursor kind: " << kind << std::endl;
     return "<" + std::to_string(kind) + ">";
   } else {
     return itr->second;
