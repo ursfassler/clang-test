@@ -79,13 +79,20 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXCli
         const auto itr = vd->visited->find(usr);
         const bool visited = (itr != vd->visited->end());
 
+//        const auto loc = utils::location(def);
+//        std::string locName = loc.first + ":" + std::to_string(loc.second);
+//        std::cout << usr << " " << locName << std::endl;
+
+        std::string name = Clang::getCursorSpelling(cursor);
+        const auto isAnonymous = name == "";
+
         Node* node;
 
-        if (visited) {
+        //TODO handle multiple anonymous namespaces in the same translation unit
+        if (visited && !isAnonymous) {  // USR for all anonymous namespaces are the same
           node = itr->second;
         } else {
           std::string kname = nameOf(kind);
-          std::string name = Clang::getCursorSpelling(cursor);
           node = new Node(name, kname);
           (*vd->visited)[usr] = node;
 
