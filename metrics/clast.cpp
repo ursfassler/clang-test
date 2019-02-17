@@ -18,9 +18,9 @@ std::map<CXCursorKind, std::string> KindName
   {CXCursor_EnumDecl, "class"},
   {CXCursor_UnionDecl, "class"},
   {CXCursor_ClassTemplate, "class"},
-  {CXCursor_CXXMethod, "function"},
-  {CXCursor_Constructor, "function"},
-  {CXCursor_Destructor, "function"},
+  {CXCursor_CXXMethod, "method"},
+  {CXCursor_Constructor, "method"},
+  {CXCursor_Destructor, "method"},
   {CXCursor_FieldDecl, "field"},
   {CXCursor_FunctionDecl, "function"},
   {CXCursor_FunctionTemplate, "function"},
@@ -41,6 +41,24 @@ bool ignore(CXCursor cursor)
 {
   const auto location = clang_getCursorLocation(cursor);
   return clang_Location_isInSystemHeader(location);
+}
+
+Node* findParent(CXCursor cursor, VisitorData* vd)
+{
+  const auto sparent = clang_getCursorSemanticParent(cursor);
+  if (clang_getCursorKind(sparent) == CXCursor_TranslationUnit) {
+    if (vd->parent != vd->root) {
+      std::cerr << "decleration missed" << std::endl;
+    }
+    return vd->root;
+  } else {
+    const auto parentIdx = vd->visited->find(Clang::getCursorUSR(sparent));
+    if (parentIdx == vd->visited->end()) {
+      return nullptr;
+    } else {
+      return parentIdx->second;
+    }
+  }
 }
 
 CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXClientData data)
@@ -70,10 +88,16 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXCli
           std::string name = Clang::getCursorSpelling(cursor);
           node = new Node(name, kname);
           (*vd->visited)[usr] = node;
-          vd->parent->children.push_back(node);
+
+          Node* pnode = findParent(cursor, vd);
+          if (pnode) {
+            pnode->children.push_back(node);
+          } else {
+            std::cerr << "parent not found for: " << name << std::endl;
+          }
         }
 
-        VisitorData nvd{node, vd->visited};
+        VisitorData nvd{node, vd->root, vd->visited};
         clang_visitChildren(cursor, visit_children, &nvd);
         break;
       }
@@ -95,22 +119,34 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXCli
     case CXCursor_ClassTemplatePartialSpecialization:
     {
         //TODO make it work with multiple input files
+        std::string print = Clang::getCursorSpelling(cursor);
 
         const auto def = clang_getCursorDefinition(cursor); // in order to traverse the method bodies
-        const auto usr = Clang::getCursorUSR(def);
-        const bool visited = (vd->visited->find(usr) != vd->visited->end());
+        const auto valid = !clang_isInvalid(clang_getCursorKind(def));
+        if (valid) {
+          const auto usr = Clang::getCursorUSR(def);
+          const bool visited = (vd->visited->find(usr) != vd->visited->end());
 
-        if (!visited) {
-          std::string kname = nameOf(kind);
-          std::string name = Clang::getCursorSpelling(cursor);
-          Node* node = new Node(name, kname);
-          const auto loc = utils::location(def);
-          node->file = loc.first;
-          node->line = loc.second;
-          vd->parent->children.push_back(node);
-          (*vd->visited)[usr] = node;
-          VisitorData nvd{node, vd->visited};
-          clang_visitChildren(def, visit_children, &nvd);
+          if (!visited) {
+            std::string kname = nameOf(kind);
+            std::string name = Clang::getCursorSpelling(cursor);
+
+            Node* node = new Node(name, kname);
+            const auto loc = utils::location(def);
+            node->file = loc.first;
+            node->line = loc.second;
+            (*vd->visited)[usr] = node;
+
+            Node* pnode = findParent(cursor, vd);
+            if (pnode) {
+              pnode->children.push_back(node);
+            } else {
+              std::cerr << "parent not found for: " << name << std::endl;
+            }
+
+            VisitorData nvd{node, vd->root, vd->visited};
+            clang_visitChildren(def, visit_children, &nvd);
+          }
         }
 
         break;

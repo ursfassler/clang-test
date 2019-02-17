@@ -32,6 +32,7 @@ struct Node
 struct VisitorData
 {
         Node* parent;
+        Node* root;
         std::map<std::string, Node*>* visited;
 };
 
@@ -49,9 +50,9 @@ class Clast
         void report(XmlWriter&) const;
 
     private:
-        Node root{{}, "project"};
+        Node root{{}, "root"};
         std::map<std::string, Node*> visited{};
-        VisitorData data{&root, &visited};
+        VisitorData data{&root, &root, &visited};
 
         void write(const Node *node, XmlWriter&) const;
         std::string idOf(const Node*) const;
