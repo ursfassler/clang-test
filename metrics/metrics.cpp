@@ -150,11 +150,14 @@ int main(int argc, char ** argv)
 
   CXIndex index = clang_createIndex(0, 1);
 
+  const auto count = options.value_inputfiles.size();
+
   std::vector<CXTranslationUnit> translationunits;
-  for (auto filename : options.value_inputfiles) {
-    CXTranslationUnit tu = process_file(
-                             visitor, index,
-                             filename, arguments);
+  for (std::size_t i = 0; i < count; i++) {
+    const auto filename = options.value_inputfiles[i];
+    std::cout << "processing file " << (i+1) << "/" << count << ": " << filename << std::endl;
+
+    CXTranslationUnit tu = process_file(visitor, index, filename, arguments);
     translationunits.push_back(tu);
   }
 
