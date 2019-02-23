@@ -43,9 +43,26 @@ bool ignore(CXCursor cursor)
   return clang_Location_isInSystemHeader(location);
 }
 
+bool isAnonymousNamespace(CXCursor cursor)
+{
+  const auto kind = clang_getCursorKind(cursor);
+
+  if (kind == CXCursor_Namespace) {
+    std::string name = Clang::getCursorSpelling(cursor);
+    return name == "";
+  } else {
+    return false;
+  }
+}
+
 Node* findParent(CXCursor cursor, VisitorData* vd)
 {
-  const auto sparent = clang_getCursorSemanticParent(cursor);
+  auto sparent = clang_getCursorSemanticParent(cursor);
+
+  while (isAnonymousNamespace(sparent)) {
+    sparent = clang_getCursorSemanticParent(sparent);
+  }
+
   if (clang_getCursorKind(sparent) == CXCursor_TranslationUnit) {
     if (vd->parent != vd->root) {
       std::cerr << "decleration missed" << std::endl;
@@ -79,33 +96,32 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXCli
         const auto itr = vd->visited->find(usr);
         const bool visited = (itr != vd->visited->end());
 
-//        const auto loc = utils::location(def);
-//        std::string locName = loc.first + ":" + std::to_string(loc.second);
-//        std::cout << usr << " " << locName << std::endl;
-
-        std::string name = Clang::getCursorSpelling(cursor);
-        const auto isAnonymous = name == "";
-
-        Node* node;
-
-        //TODO handle multiple anonymous namespaces in the same translation unit
-        if (visited && !isAnonymous) {  // USR for all anonymous namespaces are the same
-          node = itr->second;
+        if (isAnonymousNamespace(cursor)) {
+          // we merge anonymous namespaces into their parent namespace
+          clang_visitChildren(cursor, visit_children, vd);
         } else {
-          std::string kname = nameOf(kind);
-          node = new Node(name, kname);
-          (*vd->visited)[usr] = node;
+          Node* node;
 
-          Node* pnode = findParent(cursor, vd);
-          if (pnode) {
-            pnode->children.push_back(node);
+          if (visited) {
+            node = itr->second;
           } else {
-            std::cerr << "parent not found for: " << name << std::endl;
+            const std::string name = Clang::getCursorSpelling(cursor);
+            const std::string kname = nameOf(kind);
+            node = new Node(name, kname);
+            (*vd->visited)[usr] = node;
+
+            Node* pnode = findParent(cursor, vd);
+            if (pnode) {
+              pnode->children.push_back(node);
+            } else {
+              std::cerr << "parent not found for: " << name << std::endl;
+            }
           }
+
+          VisitorData nvd{node, vd->root, vd->visited};
+          clang_visitChildren(cursor, visit_children, &nvd);
         }
 
-        VisitorData nvd{node, vd->root, vd->visited};
-        clang_visitChildren(cursor, visit_children, &nvd);
         break;
       }
 
