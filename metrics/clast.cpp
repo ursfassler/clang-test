@@ -18,6 +18,7 @@ std::map<CXCursorKind, std::string> KindName
   {CXCursor_EnumDecl, "class"},
   {CXCursor_UnionDecl, "class"},
   {CXCursor_ClassTemplate, "class"},
+  {CXCursor_TypeAliasDecl, "class"},
   {CXCursor_CXXMethod, "method"},
   {CXCursor_Constructor, "method"},
   {CXCursor_Destructor, "method"},
