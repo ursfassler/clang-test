@@ -25,6 +25,7 @@ std::map<CXCursorKind, std::string> KindName
   {CXCursor_FieldDecl, "field"},
   {CXCursor_FunctionDecl, "function"},
   {CXCursor_FunctionTemplate, "function"},
+  {CXCursor_VarDecl, "variable"},
 };
 
 std::string nameOf(CXCursorKind kind)
@@ -141,8 +142,16 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXCli
     case CXCursor_FunctionTemplate:
     case CXCursor_ClassTemplate:
     case CXCursor_ClassTemplatePartialSpecialization:
+    case CXCursor_VarDecl:
     {
-        //TODO make it work with multiple input files
+        // only capture global variables
+        const auto parent = clang_getCursorSemanticParent(cursor);
+        const auto pkind = clang_getCursorKind(parent);
+        if ((kind == CXCursor_VarDecl) && ((pkind != CXCursor_Namespace) && (pkind != CXCursor_TranslationUnit))) {
+          clang_visitChildren(cursor, visit_children, vd);
+          break;
+        }
+
         std::string print = Clang::getCursorSpelling(cursor);
 
         const auto def = clang_getCursorDefinition(cursor); // in order to traverse the method bodies
@@ -188,6 +197,8 @@ CXChildVisitResult Clast::visit_children(CXCursor cursor, CXCursor parent, CXCli
     case CXCursor_MemberRefExpr:
     case CXCursor_CallExpr:
     {
+#warning we miss class to template function
+
       const CXCursor referenced = clang_getCursorReferenced(cursor);
 
       if (!ignore(referenced)) {
